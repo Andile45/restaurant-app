@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     secondaryButton:{
      backgroundColor:colors.background,
      borderWidth:1,
-     borderColor:colors.secondary,
+     borderColor:colors.border,
     },
     text:{
       fontWeight:'600',
@@ -55,5 +55,6 @@ const styles = StyleSheet.create({
     },
     secondaryText:{
        color:colors.textSecondary,
+       fontWeight:'500',
     }
 })
