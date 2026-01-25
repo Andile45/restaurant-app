@@ -1,20 +1,52 @@
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Provider, useSelector } from 'react-redux';
+import { store, useAppDispatch, type RootState } from './store/index';
+import { checkAuthSession } from './store/slices/authSlice';
+import { Loader } from './components/Loader';
+import LoginScreen from './app/(auth)/login';
+import RegisterScreen from './app/(auth)/register';
+import ForgotPasswordScreen from './app/(auth)/forgotPassword';
+import BottomTabNavigator from './navigation/BottomTabNavigator';
 
-export default function App() {
+const Stack = createNativeStackNavigator();
+
+function AppNavigator() {
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, isLoading } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    dispatch(checkAuthSession());
+  }, [dispatch]);
+
+  if (isLoading) {
+    return <Loader fullscreen />;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!isAuthenticated ? (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          </>
+        ) : (
+          <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  return (
+    <Provider store={store}>
+      <StatusBar style="auto" />
+      <AppNavigator />
+    </Provider>
+  );
+}
