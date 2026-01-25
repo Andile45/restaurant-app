@@ -1,0 +1,189 @@
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { useAppDispatch, useAppSelector } from '../../store/index';
+import { updateQuantity, removeFromCart, clearCart } from '../../store/slices/cartSlice';
+import { createOrder } from '../../store/slices/orderSlice';
+import { CustomButton } from '../../components/Button';
+import { CartItemCard } from '../../components/cart/CartItemCard';
+import { colors } from '../../theme/colors';
+import { typography } from '../../theme/typography';
+import { formatPrice } from '../../utils/formatPrice';
+
+export default function CartScreen() {
+  const navigation = useNavigation();
+  const dispatch = useAppDispatch();
+  const { items, total } = useAppSelector((state) => state.cart);
+  const { user } = useAppSelector((state) => state.auth);
+  const { isLoading } = useAppSelector((state) => state.order);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  const handleUpdateQuantity = (itemId: string, quantity: number) => {
+    dispatch(updateQuantity({ itemId, quantity }));
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    Alert.alert(
+      'Remove Item',
+      'Are you sure you want to remove this item from your cart?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => dispatch(removeFromCart(itemId)),
+        },
+      ]
+    );
+  };
+
+  const handleCheckout = async () => {
+    if (!user) {
+      Alert.alert('Error', 'Please log in to checkout');
+      return;
+    }
+    if (items.length === 0) {
+      Alert.alert('Empty Cart', 'Your cart is empty');
+      return;
+    }
+
+    setIsCheckingOut(true);
+    try {
+      const orderItems = items.map((item) => ({
+        food_id: item.id,
+        quantity: item.quantity,
+        extras: item.extras || {},
+        price: item.price,
+      }));
+
+      await dispatch(createOrder(user.id, orderItems, total, user.address || undefined));
+      dispatch(clearCart());
+      
+      Alert.alert('Order Placed!', 'Your order has been placed successfully.', [
+        { text: 'OK', onPress: () => navigation.navigate('Orders' as never) },
+      ]);
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to place order');
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Cart</Text>
+        {items.length > 0 && (
+          <Text style={styles.itemCount}>{items.length} item{items.length !== 1 ? 's' : ''}</Text>
+        )}
+      </View>
+
+      {items.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Your cart is empty</Text>
+          <Text style={styles.emptySubtext}>Add items from the menu to get started</Text>
+        </View>
+      ) : (
+        <>
+          <ScrollView
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
+            {items.map((item) => (
+              <CartItemCard
+                key={item.id}
+                item={item}
+                onUpdateQuantity={(quantity) => handleUpdateQuantity(item.id, quantity)}
+                onRemove={() => handleRemoveItem(item.id)}
+              />
+            ))}
+          </ScrollView>
+
+          <View style={styles.footer}>
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalAmount}>{formatPrice(total)}</Text>
+            </View>
+            <CustomButton
+              title={isCheckingOut ? 'Processing...' : 'Checkout'}
+              onPress={handleCheckout}
+              variant="primary"
+              style={styles.checkoutButton}
+            />
+          </View>
+        </>
+      )}
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.appBackground,
+  },
+  header: {
+    padding: 20,
+    paddingBottom: 12,
+  },
+  title: {
+    ...typography.heading,
+    color: colors.textPrimary,
+  },
+  itemCount: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: 4,
+  },
+  content: {
+    padding: 20,
+    paddingBottom: 100,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  emptyText: {
+    ...typography.heading,
+    color: colors.textPrimary,
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    ...typography.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.background,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    padding: 20,
+    paddingBottom: 20,
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  totalLabel: {
+    ...typography.heading,
+    color: colors.textPrimary,
+    fontSize: 20,
+  },
+  totalAmount: {
+    ...typography.heading,
+    color: colors.primary,
+    fontSize: 24,
+  },
+  checkoutButton: {
+    marginTop: 0,
+  },
+});
