@@ -2,7 +2,7 @@ export interface Payment{
     id:string;
     order_id:string;
     amount:number;
-    status:'pending' | 'completed' | 'failed';
+    payment_status:'pending' | 'completed' | 'failed'; // Matches database column name
     method:'card' | 'paypal' | 'voucher' | 'other';
     provider:'stripe' | 'paypal' | string;
     transaction_id?:string;
