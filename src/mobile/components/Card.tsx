@@ -20,7 +20,8 @@ const styles = StyleSheet.create({
     card:{
        backgroundColor:colors.background,
        borderRadius:24,
-       padding:20,
+       padding:16,
+       position: 'relative',
 
     // IOS Shadows
 
