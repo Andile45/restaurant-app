@@ -31,12 +31,12 @@ export const CustomButton = ({title,onPress,variant='primary',style}:ButtonProps
 
 const styles = StyleSheet.create({
     button:{
-       paddingVertical:16,
+       paddingVertical:14,
        borderRadius:25,
        alignItems:"center",
        justifyContent:'center',
        width:'100%',
-       marginVertical:8,
+       marginVertical:4,
     },
     primaryButton:{
       backgroundColor:colors.primary,
