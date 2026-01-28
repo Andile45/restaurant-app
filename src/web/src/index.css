@@ -1,13 +1,323 @@
+@import "tailwindcss";
+
+:root {
+  /* Font Families */
+  --font-family-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-family-display: 'Poppins', 'Inter', system-ui, sans-serif;
+
+  /* Font Sizes - Matching mobile app typography system */
+  --font-size-caption-xs: 11px;
+  --font-size-caption-sm: 12px;
+  --font-size-caption: 14px;
+  --font-size-body-sm: 14px;
+  --font-size-body: 16px;
+  --font-size-body-lg: 18px;
+  --font-size-heading-xs: 18px;
+  --font-size-heading-sm: 20px;
+  --font-size-heading: 24px;
+  --font-size-heading-lg: 28px;
+  --font-size-button-sm: 14px;
+  --font-size-button: 16px;
+  --font-size-button-lg: 18px;
+
+  /* Line Heights */
+  --line-height-caption-xs: 14px;
+  --line-height-caption-sm: 16px;
+  --line-height-caption: 20px;
+  --line-height-body-sm: 20px;
+  --line-height-body: 24px;
+  --line-height-body-lg: 26px;
+  --line-height-heading-xs: 24px;
+  --line-height-heading-sm: 28px;
+  --line-height-heading: 32px;
+  --line-height-heading-lg: 36px;
+  --line-height-button-sm: 18px;
+  --line-height-button: 20px;
+  --line-height-button-lg: 24px;
+
+  /* Font Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Colors - Matching mobile app brand colors */
+  --color-primary: #00B4BF;
+  --color-primary-light: #E0F7F8;
+  --color-secondary: #F1F1F1;
+  
+  --color-text-primary: #000000;
+  --color-text-secondary: #4A4A4A;
+  --color-text-inverse: #FFFFFF;
+  
+  --color-status-success: #4CAF50;
+  --color-status-error: #F44336;
+  --color-status-warning: #FF9800;
+  --color-status-info: #2196F3;
+  
+  --color-border: #E8E8E8;
+  --color-border-light: #F1F1F1;
+  
+  --color-bg-app: #E0F7F8;
+  --color-bg-surface: #FFFFFF;
+  
+  --color-overlay: rgba(0, 0, 0, 0.5);
+}
+
+/* Base Typography - Matching mobile app */
+html {
+  font-family: var(--font-family-sans);
+}
+
 body {
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-app);
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Heading Styles - Using Poppins for headings */
+h1 {
+  font-size: var(--font-size-heading-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading-lg);
+  color: var(--color-text-primary);
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+}
+
+h2 {
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-heading);
+  color: var(--color-text-primary);
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+}
+
+h3 {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-heading-sm);
+  color: var(--color-text-primary);
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+}
+
+h4 {
+  font-size: var(--font-size-heading-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-heading-xs);
+  color: var(--color-text-primary);
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+}
+
+/* Body Text */
+p {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--color-text-primary);
+}
+
+/* Links */
+a {
+  font-size: var(--font-size-body);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Code */
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Typography Utility Classes - Matching mobile app typography system */
+
+/* Heading Classes - Using Poppins font */
+.heading-lg {
+  font-size: var(--font-size-heading-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading-lg);
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+}
+
+.heading {
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-heading);
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+}
+
+.heading-sm {
+  font-size: var(--font-size-heading-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-heading-sm);
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+}
+
+.heading-xs {
+  font-size: var(--font-size-heading-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-heading-xs);
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+}
+
+/* Body Classes */
+.body-lg {
+  font-size: var(--font-size-body-lg);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body-lg);
+}
+
+.body {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+}
+
+.body-sm {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body-sm);
+}
+
+/* Button Typography */
+.button-lg {
+  font-size: var(--font-size-button-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-button-lg);
+}
+
+.button {
+  font-size: var(--font-size-button);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-button);
+}
+
+.button-sm {
+  font-size: var(--font-size-button-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-button-sm);
+}
+
+/* Caption Classes */
+.caption {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-caption);
+}
+
+.caption-sm {
+  font-size: var(--font-size-caption-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-caption-sm);
+}
+
+.caption-xs {
+  font-size: var(--font-size-caption-xs);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-caption-xs);
+}
+
+/* Label Classes */
+.label {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-caption);
+}
+
+.label-sm {
+  font-size: var(--font-size-caption-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-caption-sm);
+}
+
+/* Text Color Utilities */
+.text-primary {
+  color: var(--color-text-primary);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-inverse {
+  color: var(--color-text-inverse);
+}
+
+/* Background Color Utilities */
+.bg-bg-app {
+  background-color: var(--color-bg-app);
+}
+
+.bg-bg-surface {
+  background-color: var(--color-bg-surface);
+}
+
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-primary-light {
+  background-color: var(--color-primary-light);
+}
+
+.bg-secondary {
+  background-color: var(--color-secondary);
+}
+
+/* Text Color Utilities */
+.text-text-primary {
+  color: var(--color-text-primary);
+}
+
+.text-text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-text-inverse {
+  color: var(--color-text-inverse);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-status-success {
+  color: var(--color-status-success);
+}
+
+.text-status-error {
+  color: var(--color-status-error);
+}
+
+.text-status-warning {
+  color: var(--color-status-warning);
+}
+
+.text-status-info {
+  color: var(--color-status-info);
+}
+
+/* Border Color Utilities */
+.border-border {
+  border-color: var(--color-border);
+}
+
+.border-primary {
+  border-color: var(--color-primary);
+}
+
+/* Placeholder Color Utilities */
+.placeholder-text-secondary::placeholder {
+  color: var(--color-text-secondary);
+}
+
+/* Navigation Menu Active State - Ensure text is visible */
+nav a.bg-primary,
+nav a.bg-primary span,
+nav a.bg-primary svg {
+  color: var(--color-text-inverse) !important;
 }
