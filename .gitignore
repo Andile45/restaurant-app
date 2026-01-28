@@ -29,3 +29,7 @@ Thumbs.db
 
 # Database scripts are safe to commit (no credentials)
 # All SQL files contain only schema definitions and setup scripts
+
+# Scripts and temporary files
+commit-changes.ps1
+*.ps1
