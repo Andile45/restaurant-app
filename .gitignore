@@ -33,3 +33,5 @@ Thumbs.db
 # Scripts and temporary files
 commit-changes.ps1
 *.ps1
+GIT-COMMIT-INSTRUCTIONS.md
+REMOVE-COMMIT-CHANGES.md
