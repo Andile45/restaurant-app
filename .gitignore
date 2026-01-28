@@ -27,6 +27,5 @@ Thumbs.db
 .expo/
 .expo-shared/
 
-# Database scripts with potential sensitive info
-database-fix-rls-policies.sql
-# Keep database-fix-rls-policies.sql as it's documentation without credentials
+# Database scripts are safe to commit (no credentials)
+# All SQL files contain only schema definitions and setup scripts

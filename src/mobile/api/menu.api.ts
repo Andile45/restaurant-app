@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient';
-import type { Category } from '../common/types/category';
-import type { FoodItem } from '../common/types/foodItem';
+import type { Category } from '../../common/types/category';
+import type { FoodItem } from '../../common/types/foodItem';
 
 export const fetchCategories = async (): Promise<{ data: Category[] | null; error: any }> => {
   const { data, error } = await supabase

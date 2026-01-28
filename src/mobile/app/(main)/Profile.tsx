@@ -1,13 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store/index';
 import { logoutUser } from '../../store/slices/authSlice';
 import { CustomButton } from '../../components/Button';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 
+type RootStackParamList = {
+  EditProfile: undefined;
+};
+
 export default function ProfileScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
 
@@ -48,9 +56,24 @@ export default function ProfileScreen() {
             {user.contact_number && (
               <Text style={styles.contact}>{user.contact_number}</Text>
             )}
+            {user.address && (
+              <View style={styles.addressContainer}>
+                <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.address}>{user.address}</Text>
+              </View>
+            )}
           </View>
         )}
         
+        <View style={styles.section}>
+          <CustomButton
+            title="Edit Profile"
+            onPress={() => navigation.navigate('EditProfile')}
+            variant="primary"
+            style={styles.editButton}
+          />
+        </View>
+
         <View style={styles.section}>
           <CustomButton
             title="Logout"
@@ -110,8 +133,24 @@ const styles = StyleSheet.create({
   contact: {
     ...typography.body,
     color: colors.textSecondary,
+    marginBottom: 4,
+  },
+  addressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    maxWidth: '90%',
+  },
+  address: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginLeft: 6,
+    flex: 1,
   },
   section: {
     marginTop: 24,
+  },
+  editButton: {
+    marginBottom: 0,
   },
 });

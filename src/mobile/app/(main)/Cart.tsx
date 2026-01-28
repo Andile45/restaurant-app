@@ -2,28 +2,41 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppDispatch, useAppSelector } from '../../store/index';
 import { updateQuantity, removeFromCart, clearCart } from '../../store/slices/cartSlice';
 import { createOrder } from '../../store/slices/orderSlice';
 import { CustomButton } from '../../components/Button';
 import { CartItemCard } from '../../components/cart/CartItemCard';
+import { EmptyState } from '../../components/EmptyState';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { formatPrice } from '../../utils/formatPrice';
 
+type RootStackParamList = {
+  Payment: {
+    orderId: string;
+    amount: number;
+    email: string;
+  };
+  MainTabs: {
+    screen?: string;
+  };
+};
+
 export default function CartScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const dispatch = useAppDispatch();
   const { items, total } = useAppSelector((state) => state.cart);
   const { user } = useAppSelector((state) => state.auth);
   const { isLoading } = useAppSelector((state) => state.order);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
-  const handleUpdateQuantity = (itemId: string, quantity: number) => {
-    dispatch(updateQuantity({ itemId, quantity }));
+  const handleUpdateQuantity = (cartItemId: string, quantity: number) => {
+    dispatch(updateQuantity({ cartItemId, quantity }));
   };
 
-  const handleRemoveItem = (itemId: string) => {
+  const handleRemoveItem = (cartItemId: string) => {
     Alert.alert(
       'Remove Item',
       'Are you sure you want to remove this item from your cart?',
@@ -32,7 +45,7 @@ export default function CartScreen() {
         {
           text: 'Remove',
           style: 'destructive',
-          onPress: () => dispatch(removeFromCart(itemId)),
+          onPress: () => dispatch(removeFromCart(cartItemId)),
         },
       ]
     );
@@ -57,14 +70,19 @@ export default function CartScreen() {
         price: item.price,
       }));
 
-      await dispatch(createOrder(user.id, orderItems, total, user.address || undefined));
-      dispatch(clearCart());
+      const order = await dispatch(createOrder(user.id, orderItems, total, user.address || undefined));
       
-      Alert.alert('Order Placed!', 'Your order has been placed successfully.', [
-        { text: 'OK', onPress: () => navigation.navigate('Orders' as never) },
-      ]);
+      if (order && order.id) {
+        navigation.navigate('Payment', {
+          orderId: order.id,
+          amount: total,
+          email: user.email,
+        });
+      } else {
+        Alert.alert('Error', 'Failed to create order. Please try again.');
+      }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to place order');
+      Alert.alert('Error', error.message || 'Failed to create order');
     } finally {
       setIsCheckingOut(false);
     }
@@ -80,10 +98,16 @@ export default function CartScreen() {
       </View>
 
       {items.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Your cart is empty</Text>
-          <Text style={styles.emptySubtext}>Add items from the menu to get started</Text>
-        </View>
+        <EmptyState
+          icon="cart-outline"
+          title="Your cart is empty"
+          message="Add items from the menu to get started"
+          actionLabel="Browse Menu"
+          onAction={() => {
+            (navigation as any).navigate('MainTabs', { screen: 'Menu' });
+          }}
+          variant="info"
+        />
       ) : (
         <>
           <ScrollView
@@ -92,10 +116,10 @@ export default function CartScreen() {
           >
             {items.map((item) => (
               <CartItemCard
-                key={item.id}
+                key={item.cartItemId}
                 item={item}
-                onUpdateQuantity={(quantity) => handleUpdateQuantity(item.id, quantity)}
-                onRemove={() => handleRemoveItem(item.id)}
+                onUpdateQuantity={(quantity) => handleUpdateQuantity(item.cartItemId, quantity)}
+                onRemove={() => handleRemoveItem(item.cartItemId)}
               />
             ))}
           </ScrollView>
@@ -106,9 +130,12 @@ export default function CartScreen() {
               <Text style={styles.totalAmount}>{formatPrice(total)}</Text>
             </View>
             <CustomButton
-              title={isCheckingOut ? 'Processing...' : 'Checkout'}
+              title="Checkout"
               onPress={handleCheckout}
               variant="primary"
+              loading={isCheckingOut || isLoading}
+              disabled={isCheckingOut || isLoading}
+              rightIcon="arrow-forward"
               style={styles.checkoutButton}
             />
           </View>
@@ -139,22 +166,6 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 100,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  emptyText: {
-    ...typography.heading,
-    color: colors.textPrimary,
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
   },
   footer: {
     position: 'absolute',

@@ -6,7 +6,7 @@ import { CustomButton } from '../Button';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { formatPrice } from '../../utils/formatPrice';
-import type { FoodItem } from '../../../../common/types/foodItem';
+import type { FoodItem } from '../../../common/types/foodItem';
 
 interface FoodItemCardProps {
   foodItem: FoodItem;
@@ -111,9 +111,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   unavailable: {
-    ...typography.caption,
-    color: '#D32F2F',
-    fontSize: 11,
+    ...typography.captionSmall,
+    color: colors.error,
     marginTop: 4,
   },
 });

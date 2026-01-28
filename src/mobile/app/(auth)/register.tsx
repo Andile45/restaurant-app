@@ -1,34 +1,51 @@
-import React from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
+import { useToast } from 'react-native-toast-notifications';
 import { useAppDispatch } from '../../store/index';
 import { Formik } from 'formik';
 import { AuthScreenLayout } from '../../components/auth/AuthScreenLayout';
 import { ErrorDisplay } from '../../components/auth/ErrorDisplay';
+import { SuccessDisplay } from '../../components/auth/SuccessDisplay';
 import { Divider } from '../../components/auth/Divider';
 import { AuthFooter } from '../../components/auth/AuthFooter';
 import { SocialLoginIcons } from '../../components/auth/SocialLoginIcons';
-import { Input } from '../../components/Input';
 import { CustomButton } from '../../components/Button';
-import { Icon } from '../../components/Icon';
+import { RegisterFormFields } from '../../components/auth/RegisterFormFields';
 import { colors } from '../../theme/colors';
-import { registerUser, loginWithGoogle, setError } from '../../store/slices/authSlice';
+import { registerUser, loginWithGoogle, setError, clearRegistrationSuccess } from '../../store/slices/authSlice';
 import type { RootState } from '../../store/index';
 import { registerSchema } from '../../utils/validationSchemas';
 
 export default function RegisterScreen() {
   const navigation = useNavigation();
   const dispatch = useAppDispatch();
-  const { error } = useSelector((state: RootState) => state.auth);
+  const toast = useToast();
+  const { error, registrationSuccess, registrationEmail } = useSelector((state: RootState) => state.auth);
 
-  // Clear error when screen is focused
   useFocusEffect(
     React.useCallback(() => {
       dispatch(setError(null));
+      dispatch(clearRegistrationSuccess());
     }, [dispatch])
   );
+
+  useEffect(() => {
+    if (registrationSuccess && registrationEmail) {
+      toast.show(
+        `Account created successfully!\nPlease check your email (${registrationEmail}) and click the confirmation link to activate your account.`,
+        {
+          type: 'success',
+          duration: 6000,
+        }
+      );
+      setTimeout(() => {
+        dispatch(clearRegistrationSuccess());
+      }, 100);
+    }
+  }, [registrationSuccess, registrationEmail, toast, dispatch]);
 
   const handleRegister = async (values: {
     name: string;
@@ -75,118 +92,56 @@ export default function RegisterScreen() {
     >
       <View style={styles.cardContainer}>
         <ErrorDisplay error={error} />
-
-      <Formik
-        initialValues={{ 
-          name: '', 
-          surname: '', 
-          email: '', 
-          contact_number: '', 
-          password: '', 
-          confirmPassword: '' 
-        }}
-        validationSchema={registerSchema}
-        onSubmit={(values) => handleRegister(values)}
-      >
-        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-          <View>
-            <Input
-              placeholder="Name"
-              value={values.name}
-              onChangeText={handleChange('name')}
-              onBlur={handleBlur('name')}
-              autoCapitalize="words"
-              leftIcon={<Icon name="person" />}
-            />
-            {touched.name && errors.name && (
-              <Text style={styles.errorText}>{errors.name}</Text>
-            )}
-
-            <Input
-              placeholder="Surname"
-              value={values.surname}
-              onChangeText={handleChange('surname')}
-              onBlur={handleBlur('surname')}
-              autoCapitalize="words"
-              leftIcon={<Icon name="person" />}
-            />
-            {touched.surname && errors.surname && (
-              <Text style={styles.errorText}>{errors.surname}</Text>
-            )}
-
-            <Input
-              placeholder="Email address"
-              value={values.email}
-              onChangeText={handleChange('email')}
-              onBlur={handleBlur('email')}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              leftIcon={<Icon name="envelope" />}
-            />
-            {touched.email && errors.email && (
-              <Text style={styles.errorText}>{errors.email}</Text>
-            )}
-
-            <Input
-              placeholder="Contact number"
-              value={values.contact_number}
-              onChangeText={handleChange('contact_number')}
-              onBlur={handleBlur('contact_number')}
-              keyboardType="phone-pad"
-              autoCapitalize="none"
-              leftIcon={<Icon name="call" />}
-            />
-            {touched.contact_number && errors.contact_number && (
-              <Text style={styles.errorText}>{errors.contact_number}</Text>
-            )}
-
-            <Input
-              placeholder="Password"
-              value={values.password}
-              onChangeText={handleChange('password')}
-              onBlur={handleBlur('password')}
-              secureTextEntry
-              autoCapitalize="none"
-              leftIcon={<Icon name="lock" />}
-            />
-            {touched.password && errors.password && (
-              <Text style={styles.errorText}>{errors.password}</Text>
-            )}
-
-            <Input
-              placeholder="Confirm Password"
-              value={values.confirmPassword}
-              onChangeText={handleChange('confirmPassword')}
-              onBlur={handleBlur('confirmPassword')}
-              secureTextEntry
-              autoCapitalize="none"
-              leftIcon={<Icon name="lock" />}
-            />
-            {touched.confirmPassword && errors.confirmPassword && (
-              <Text style={styles.errorText}>{errors.confirmPassword}</Text>
-            )}
-
-            <CustomButton
-              title="Create Account"
-              onPress={handleSubmit}
-              variant="primary"
-              style={styles.registerButton}
-            />
-          </View>
+        {registrationSuccess && registrationEmail && (
+          <SuccessDisplay
+            message="Account created successfully!"
+            description={`Please check your email (${registrationEmail}) and click the confirmation link to activate your account. Once confirmed, you can sign in.`}
+          />
         )}
-      </Formik>
 
-      <AuthFooter
-        questionText="Already have an account?"
-        linkText="Sign In here"
-        onLinkPress={() => navigation.navigate('Login' as never)}
-      />
+        <Formik
+          initialValues={{ 
+            name: '', 
+            surname: '', 
+            email: '', 
+            contact_number: '', 
+            password: '', 
+            confirmPassword: '' 
+          }}
+          validationSchema={registerSchema}
+          onSubmit={(values) => handleRegister(values)}
+        >
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            <View>
+              <RegisterFormFields
+                values={values}
+                errors={errors}
+                touched={touched}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+              />
 
-      <Divider />
+              <CustomButton
+                title="Create Account"
+                onPress={handleSubmit}
+                variant="primary"
+                style={styles.registerButton}
+              />
+            </View>
+          )}
+        </Formik>
 
-      <SocialLoginIcons
-        onGooglePress={handleGoogleLogin}
-      />
+        <AuthFooter
+          questionText="Already have an account?"
+          linkText="Sign In here"
+          onLinkPress={() => navigation.navigate('Login' as never)}
+        />
+
+        <Divider />
+
+        <SocialLoginIcons
+          onGooglePress={handleGoogleLogin}
+        />
       </View>
     </AuthScreenLayout>
   );
@@ -198,13 +153,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 8,
-  },
-  errorText: {
-    color: '#D32F2F',
-    fontSize: 12,
-    fontFamily: 'Inter_400Regular',
-    marginTop: -2,
-    marginBottom: 4,
   },
   registerButton: {
     marginTop: 8,

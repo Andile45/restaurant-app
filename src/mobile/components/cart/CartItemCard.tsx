@@ -9,6 +9,7 @@ import { formatPrice } from '../../utils/formatPrice';
 
 interface CartItem {
   id: string;
+  cartItemId: string;
   name: string;
   description?: string;
   price: number;

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '../../store/index';
@@ -14,6 +14,7 @@ import type { FoodItem } from '../../../common/types/foodItem';
 
 export default function MenuScreen() {
   const dispatch = useAppDispatch();
+  const scrollViewRef = useRef<ScrollView>(null);
   const { categories, foodItems, selectedCategory, isLoading, error } = useAppSelector(
     (state) => state.menu
   );
@@ -54,25 +55,36 @@ export default function MenuScreen() {
 
       {categories.length > 0 && (
         <View style={styles.categoriesContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoriesScroll}
-          >
-            <CategoryTab
-              label="All"
-              isSelected={selectedCategory === null}
-              onPress={() => handleCategorySelect(null)}
-            />
-            {categories.map((category) => (
+          <View style={styles.scrollWrapper}>
+            <ScrollView
+              ref={scrollViewRef}
+              horizontal
+              showsHorizontalScrollIndicator={true}
+              contentContainerStyle={styles.categoriesScroll}
+              style={styles.categoriesScrollView}
+              accessibilityRole="tablist"
+              accessibilityLabel="Food categories"
+              scrollIndicatorInsets={{ right: 20, left: 20 }}
+            >
               <CategoryTab
-                key={category.id}
-                label={category.name}
-                isSelected={selectedCategory === category.id}
-                onPress={() => handleCategorySelect(category.id)}
+                label="All"
+                isSelected={selectedCategory === null}
+                onPress={() => handleCategorySelect(null)}
+                accessibilityLabel="All categories"
               />
-            ))}
-          </ScrollView>
+              {categories.map((category) => (
+                <CategoryTab
+                  key={category.id}
+                  label={category.name}
+                  isSelected={selectedCategory === category.id}
+                  onPress={() => handleCategorySelect(category.id)}
+                  accessibilityLabel={`${category.name} category`}
+                />
+              ))}
+            </ScrollView>
+            <View style={styles.rightFade} pointerEvents="none" />
+            <View style={styles.leftFade} pointerEvents="none" />
+          </View>
         </View>
       )}
 
@@ -117,11 +129,39 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoriesContainer: {
-    marginBottom: 16,
+    marginBottom: 24,
+    paddingBottom: 8,
+    position: 'relative',
+  },
+  scrollWrapper: {
+    position: 'relative',
+  },
+  categoriesScrollView: {
+    maxHeight: 60,
   },
   categoriesScroll: {
     paddingHorizontal: 20,
+    paddingVertical: 8,
     gap: 12,
+    alignItems: 'center',
+  },
+  rightFade: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 30,
+    backgroundColor: 'rgba(224, 247, 248, 0.7)',
+    zIndex: 1,
+  },
+  leftFade: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 30,
+    backgroundColor: 'rgba(224, 247, 248, 0.7)',
+    zIndex: 1,
   },
   foodList: {
     padding: 20,

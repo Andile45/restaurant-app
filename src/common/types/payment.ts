@@ -4,10 +4,9 @@ export interface Payment{
     amount:number;
     payment_status:'pending' | 'completed' | 'failed'; // Matches database column name
     method:'card' | 'paypal' | 'voucher' | 'other';
-    provider:'stripe' | 'paypal' | string;
+    provider:'stripe' | 'paypal' | 'paystack' | string;
     transaction_id?:string;
     card_last4?:string;
     currency:string;
     created_at:string;
-
 }

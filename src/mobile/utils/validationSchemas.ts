@@ -36,3 +36,18 @@ export const forgotPasswordSchema = Yup.object().shape({
     .email('Invalid email address')
     .required('Email is required'),
 });
+
+export const updateProfileSchema = Yup.object().shape({
+  name: Yup.string()
+    .min(2, 'Name must be at least 2 characters')
+    .required('Name is required'),
+  surname: Yup.string()
+    .min(2, 'Surname must be at least 2 characters')
+    .required('Surname is required'),
+  contact_number: Yup.string()
+    .matches(/^[0-9+\-\s()]+$/, 'Contact number must contain only numbers and valid characters')
+    .min(10, 'Contact number must be at least 10 characters')
+    .required('Contact number is required'),
+  address: Yup.string()
+    .optional(),
+});

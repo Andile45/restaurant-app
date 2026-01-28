@@ -1,4 +1,4 @@
-import type { Profile } from '../../../common/types/profile';
+import type { Profile } from '../../common/types/profile';
 
 export const mapProfileFromDatabase = (
   profile: any,
