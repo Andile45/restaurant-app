@@ -34,7 +34,15 @@ const menuSlice = createSlice({
       state.categories = action.payload;
     },
     setFoodItems: (state, action: PayloadAction<FoodItem[]>) => {
-      state.foodItems = action.payload;
+      const seenIds = new Set<string>();
+      const uniqueItems = action.payload.filter((item) => {
+        if (seenIds.has(item.id)) {
+          return false;
+        }
+        seenIds.add(item.id);
+        return true;
+      });
+      state.foodItems = uniqueItems;
     },
     setSelectedCategory: (state, action: PayloadAction<string | null>) => {
       state.selectedCategory = action.payload;
@@ -57,7 +65,6 @@ export const {
   clearMenu,
 } = menuSlice.actions;
 
-// Async thunks
 export const loadCategories = () => async (dispatch: AppDispatch) => {
   try {
     dispatch(setLoading(true));

@@ -7,6 +7,8 @@ interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
+  registrationSuccess: boolean;
+  registrationEmail: string | null;
 }
 
 const initialState: AuthState = {
@@ -15,6 +17,8 @@ const initialState: AuthState = {
   isLoading: false,
   isAuthenticated: false,
   error: null,
+  registrationSuccess: false,
+  registrationEmail: null,
 };
 
 const authSlice = createSlice({
@@ -39,13 +43,23 @@ const authSlice = createSlice({
       state.session = null;
       state.isAuthenticated = false;
       state.error = null;
+      state.registrationSuccess = false;
+      state.registrationEmail = null;
+    },
+    setRegistrationSuccess: (state, action: PayloadAction<{ email: string }>) => {
+      state.registrationSuccess = true;
+      state.registrationEmail = action.payload.email;
+      state.error = null;
+    },
+    clearRegistrationSuccess: (state) => {
+      state.registrationSuccess = false;
+      state.registrationEmail = null;
     },
   },
 });
 
-export const { setLoading, setError, setUser, setSession, clearAuth } = authSlice.actions;
+export const { setLoading, setError, setUser, setSession, clearAuth, setRegistrationSuccess, clearRegistrationSuccess } = authSlice.actions;
 
-// Re-export thunks from authThunks
 export {
   loginUser,
   registerUser,
@@ -53,6 +67,7 @@ export {
   checkAuthSession,
   loginWithGoogle,
   resetUserPassword,
+  updateProfile,
 } from './authThunks';
 
 export default authSlice.reducer;

@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { FoodItem } from '../../../common/types/foodItem';
 
-interface CartItem extends FoodItem {
+export interface CartItem extends FoodItem {
+  cartItemId: string;
   quantity: number;
   extras?: {
     add_ons?: string[];
@@ -30,45 +31,46 @@ const cartSlice = createSlice({
       
       const existingItemIndex = state.items.findIndex(
         item => item.id === foodItem.id && 
-        JSON.stringify(item.extras) === JSON.stringify(extras)
+        JSON.stringify(item.extras || {}) === JSON.stringify(extras || {})
       );
 
       if (existingItemIndex >= 0) {
-        // Item already exists, update quantity
+        // Item already exists, increase quantity
         state.items[existingItemIndex].quantity += quantity;
       } else {
-        // New item
+        // New item - generate unique cart item ID for React keys
+        const cartItemId = `${foodItem.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         state.items.push({
           ...foodItem,
+          cartItemId,
           quantity,
           extras: extras || {},
         });
       }
 
-      // Recalculate total
       state.total = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     },
     removeFromCart: (state, action: PayloadAction<string>) => {
-      const itemId = action.payload;
-      state.items = state.items.filter(item => item.id !== itemId);
+      const cartItemId = action.payload;
+      state.items = state.items.filter(item => item.cartItemId !== cartItemId);
       state.total = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     },
-    updateQuantity: (state, action: PayloadAction<{ itemId: string; quantity: number }>) => {
-      const { itemId, quantity } = action.payload;
-      const item = state.items.find(item => item.id === itemId);
+    updateQuantity: (state, action: PayloadAction<{ cartItemId: string; quantity: number }>) => {
+      const { cartItemId, quantity } = action.payload;
+      const item = state.items.find(item => item.cartItemId === cartItemId);
       
       if (item) {
         if (quantity <= 0) {
-          state.items = state.items.filter(item => item.id !== itemId);
+          state.items = state.items.filter(item => item.cartItemId !== cartItemId);
         } else {
           item.quantity = quantity;
         }
         state.total = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       }
     },
-    updateItemExtras: (state, action: PayloadAction<{ itemId: string; extras: CartItem['extras'] }>) => {
-      const { itemId, extras } = action.payload;
-      const item = state.items.find(item => item.id === itemId);
+    updateItemExtras: (state, action: PayloadAction<{ cartItemId: string; extras: CartItem['extras'] }>) => {
+      const { cartItemId, extras } = action.payload;
+      const item = state.items.find(item => item.cartItemId === cartItemId);
       
       if (item) {
         item.extras = extras;

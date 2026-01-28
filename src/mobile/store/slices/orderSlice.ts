@@ -50,7 +50,88 @@ const orderSlice = createSlice({
 
 export const { setLoading, setError, setOrders, addOrder, setCurrentOrder, updateOrderStatus } = orderSlice.actions;
 
-// Async thunks
+/**
+ * Verify order before payment
+ * Checks if order exists, belongs to user, is pending, and amount matches
+ */
+export const verifyOrderForPayment = (
+  orderId: string,
+  userId: string,
+  expectedAmount: number
+) => async (dispatch: any) => {
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('id, user_id, total, status')
+      .eq('id', orderId)
+      .single();
+
+    if (error) throw error;
+
+    if (!data) {
+      throw new Error('Order not found');
+    }
+
+    if (data.user_id !== userId) {
+      throw new Error('Order does not belong to current user');
+    }
+
+    // Verify order is pending
+    if (data.status !== 'pending') {
+      throw new Error(`Order is already ${data.status}`);
+    }
+
+    const orderAmount = Number(data.total);
+    const amountDifference = Math.abs(orderAmount - expectedAmount);
+    if (amountDifference > 0.01) {
+      throw new Error(`Order amount mismatch. Expected ${expectedAmount}, got ${orderAmount}`);
+    }
+
+    // Check if order already has a completed payment
+    const { data: existingPayments, error: paymentCheckError } = await supabase
+      .from('payments')
+      .select('id')
+      .eq('order_id', orderId)
+      .eq('payment_status', 'completed')
+      .limit(1);
+
+    if (paymentCheckError && paymentCheckError.code !== 'PGRST116') {
+      throw paymentCheckError;
+    }
+
+    if (existingPayments && existingPayments.length > 0) {
+      throw new Error('Order has already been paid');
+    }
+
+    return data;
+  } catch (error: any) {
+    dispatch(setError(error.message || 'Failed to verify order'));
+    throw error;
+  }
+};
+
+/**
+ * Update order status in database
+ */
+export const updateOrderStatusInDb = (
+  orderId: string,
+  status: Order['status']
+) => async (dispatch: any) => {
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({ status })
+      .eq('id', orderId);
+
+    if (error) throw error;
+
+    dispatch(updateOrderStatus({ orderId, status }));
+  } catch (error: any) {
+    dispatch(setError(error.message || 'Failed to update order status'));
+    throw error;
+  }
+};
+
 export const fetchUserOrders = (userId: string) => async (dispatch: any) => {
   try {
     dispatch(setLoading(true));
@@ -80,6 +161,59 @@ export const fetchUserOrders = (userId: string) => async (dispatch: any) => {
   }
 };
 
+/**
+ * Fetch order by ID with food item details
+ */
+export const fetchOrderById = (orderId: string, userId: string) => async (dispatch: any) => {
+  try {
+    dispatch(setLoading(true));
+    dispatch(setError(null));
+
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select(`
+        *,
+        order_items (
+          *,
+          food_id
+        )
+      `)
+      .eq('id', orderId)
+      .eq('user_id', userId)
+      .single();
+
+    if (orderError) throw orderError;
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    const foodIds = order.order_items?.map((item: any) => item.food_id) || [];
+    if (foodIds.length > 0) {
+      const { data: foodItems, error: foodError } = await supabase
+        .from('food_items')
+        .select('id, name, description, price, image_url')
+        .in('id', foodIds);
+
+      if (foodError) throw foodError;
+
+      const foodMap = new Map(foodItems?.map((item: any) => [item.id, item]) || []);
+      order.order_items = order.order_items?.map((item: any) => ({
+        ...item,
+        food_item: foodMap.get(item.food_id),
+      })) || [];
+    }
+
+    dispatch(setCurrentOrder(order as Order));
+    return order as Order;
+  } catch (error: any) {
+    dispatch(setError(error.message || 'Failed to fetch order'));
+    throw error;
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
 export const createOrder = (
   userId: string,
   items: Array<{ food_id: string; quantity: number; extras?: any; price?: number }>,
@@ -90,7 +224,6 @@ export const createOrder = (
     dispatch(setLoading(true));
     dispatch(setError(null));
 
-    // Fetch food items to get current prices if not provided
     const foodIds = items.map(item => item.food_id);
     const { data: foodItems, error: foodError } = await supabase
       .from('food_items')
@@ -103,6 +236,19 @@ export const createOrder = (
     const priceMap = new Map(
       foodItems?.map(item => [item.id, Number(item.price)]) || []
     );
+
+    if (items.some(item => item.price !== undefined)) {
+      const priceMismatches = items.filter(item => {
+        if (item.price === undefined) return false;
+        const currentPrice = priceMap.get(item.food_id);
+        const cartPrice = item.price;
+        return currentPrice && Math.abs(currentPrice - cartPrice) > 0.01;
+      });
+
+      if (priceMismatches.length > 0) {
+        throw new Error('Item prices have changed. Please refresh your cart.');
+      }
+    }
 
     // Create order
     const { data: order, error: orderError } = await supabase
@@ -118,14 +264,11 @@ export const createOrder = (
 
     if (orderError) throw orderError;
 
-    // Create order items with price_at_purchase
     const orderItems = items.map(item => {
-      const price = item.price ?? priceMap.get(item.food_id) ?? 0;
       return {
         order_id: order.id,
         food_id: item.food_id,
         quantity: item.quantity,
-        price_at_purchase: price,
         extras: item.extras || {},
       };
     });
@@ -136,7 +279,6 @@ export const createOrder = (
 
     if (itemsError) throw itemsError;
 
-    // Fetch complete order with items
     const { data: completeOrder, error: fetchError } = await supabase
       .from('orders')
       .select(`
