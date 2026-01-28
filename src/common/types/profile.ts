@@ -7,6 +7,6 @@ export interface Profile{
     email:string;
     address?:string;
     card_last4?:string;
-    role:'user' | 'admin';
+    role:'user' | 'admin' | 'manager' | 'staff';
     created_at:string
 }
