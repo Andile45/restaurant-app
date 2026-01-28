@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../Card';
+import { BrandLogo } from '../BrandLogo';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 
@@ -35,6 +36,9 @@ export const AuthScreenLayout: React.FC<AuthScreenLayoutProps> = ({
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
+          <View style={styles.brandContainer}>
+            <BrandLogo variant="large" />
+          </View>
           <Card style={styles.card}>
             <View style={styles.headerContainer}>
               <View style={styles.backButtonSide}>
@@ -68,6 +72,11 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   card: {
+    width: '100%',
+  },
+  brandContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
     width: '100%',
   },
   headerContainer: {

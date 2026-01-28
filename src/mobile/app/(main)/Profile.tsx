@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store/index';
 import { logoutUser } from '../../store/slices/authSlice';
 import { CustomButton } from '../../components/Button';
+import { BrandLogo } from '../../components/BrandLogo';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 
@@ -38,6 +39,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
+        <BrandLogo variant="small" />
       </View>
       
       <ScrollView contentContainerStyle={styles.content}>
@@ -94,6 +96,9 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
     paddingBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   title: {
     ...typography.heading,

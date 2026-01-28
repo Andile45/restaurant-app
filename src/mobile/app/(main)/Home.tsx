@@ -13,6 +13,7 @@ import { RecentFavoriteCard } from '../../components/home/RecentFavoriteCard';
 import { FoodItemCard } from '../../components/menu/FoodItemCard';
 import { CategoryTab } from '../../components/menu/CategoryTab';
 import { EmptyState } from '../../components/EmptyState';
+import { BrandLogo } from '../../components/BrandLogo';
 import type { FoodItem } from '../../../common/types/foodItem';
 import type { Order } from '../../../common/types/order';
 
@@ -143,7 +144,12 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.content}>
-        <Text style={styles.title}>{greeting}, {user?.name}!</Text>
+        <View style={styles.headerRow}>
+          <View style={styles.greetingContainer}>
+            <Text style={styles.title}>{greeting}, {user?.name}!</Text>
+          </View>
+          <BrandLogo variant="small" />
+        </View>
         
         <View style={styles.searchContainer}>
           <SearchBar
@@ -258,13 +264,21 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  greetingContainer: {
+    flex: 1,
+  },
   title: {
     ...typography.heading,
     fontFamily: 'Inter_700Bold',
     fontSize: 28,
     fontWeight: '800',
     color: colors.textPrimary,
-    marginBottom: 12,
   },
   searchContainer: {
     marginBottom: 16,

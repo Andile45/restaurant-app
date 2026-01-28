@@ -9,6 +9,7 @@ import { createOrder } from '../../store/slices/orderSlice';
 import { CustomButton } from '../../components/Button';
 import { CartItemCard } from '../../components/cart/CartItemCard';
 import { EmptyState } from '../../components/EmptyState';
+import { BrandLogo } from '../../components/BrandLogo';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { formatPrice } from '../../utils/formatPrice';
@@ -153,6 +154,12 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
     paddingBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  headerLeft: {
+    flex: 1,
   },
   title: {
     ...typography.heading,

@@ -12,6 +12,7 @@ import { createPayment } from '../../store/slices/paymentSlice';
 import { updateOrderStatusInDb, verifyOrderForPayment } from '../../store/slices/orderSlice';
 import { clearCart } from '../../store/slices/cartSlice';
 import { CustomButton } from '../../components/Button';
+import { BrandLogo } from '../../components/BrandLogo';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { formatPrice } from '../../utils/formatPrice';
@@ -593,7 +594,10 @@ export default function PaymentScreen() {
           >
             <Ionicons name="close" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.webViewTitle}>Complete Payment</Text>
+          <View style={styles.webViewHeaderCenter}>
+            <BrandLogo variant="compact" />
+            <Text style={styles.webViewTitle}>Complete Payment</Text>
+          </View>
           <View style={styles.closeButton} />
         </View>
         <WebView
@@ -837,6 +841,7 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 20,
     alignItems: 'center',
+    gap: 8,
   },
   title: {
     ...typography.heading,
@@ -1100,6 +1105,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+  },
+  webViewHeaderCenter: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
   },
   webViewTitle: {
     ...typography.heading,

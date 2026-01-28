@@ -11,6 +11,7 @@ import { SearchBar } from '../../components/home/SearchBar';
 import { Loader } from '../../components/Loader';
 import { ErrorDisplay } from '../../components/auth/ErrorDisplay';
 import { EmptyState } from '../../components/EmptyState';
+import { BrandLogo } from '../../components/BrandLogo';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import type { Order } from '../../../common/types/order';
@@ -103,12 +104,15 @@ export default function OrdersScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Orders</Text>
-        {orders.length > 0 && (
-          <Text style={styles.subtitle}>
-            {filteredAndSortedOrders.length} of {orders.length} order{orders.length !== 1 ? 's' : ''}
-          </Text>
-        )}
+        <View style={styles.headerLeft}>
+          <Text style={styles.title}>Orders</Text>
+          {orders.length > 0 && (
+            <Text style={styles.subtitle}>
+              {filteredAndSortedOrders.length} of {orders.length} order{orders.length !== 1 ? 's' : ''}
+            </Text>
+          )}
+        </View>
+        <BrandLogo variant="small" />
       </View>
 
       {error && (
@@ -268,6 +272,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  headerLeft: {
+    flex: 1,
   },
   title: {
     ...typography.heading,
