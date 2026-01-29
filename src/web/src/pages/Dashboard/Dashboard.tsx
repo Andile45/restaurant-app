@@ -1,115 +1,33 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../../api/supabaseClient';
-import { HiOutlineClipboardList, HiOutlineCurrencyDollar, HiOutlineCube } from 'react-icons/hi';
-
-interface DashboardStats {
-  todayOrders: number;
-  revenue: number;
-  activeItems: number;
-  totalItems: number;
-}
-
-interface RecentOrder {
-  id: string;
-  order_number: string;
-  total: number;
-  status: string;
-  created_at: string;
-}
+import { HiOutlineDownload } from 'react-icons/hi';
+import { getRangeLabel } from './dashboardUtils';
+import type { DateRange } from './dashboardUtils';
+import { useDashboardData } from './useDashboardData';
+import { DashboardStatsCards } from './DashboardStatsCards';
+import { RecentOrdersTable } from './RecentOrdersTable';
+import { TopItemsList } from './TopItemsList';
 
 export const Dashboard: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats>({
-    todayOrders: 0,
-    revenue: 0,
-    activeItems: 0,
-    totalItems: 0,
-  });
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { dateRange, setDateRange, stats, recentOrders, topItems, loading } = useDashboardData();
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      
-      // Get today's date range
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
-      // Fetch today's orders
-      const { data: ordersData, error: ordersError } = await supabase
-        .from('orders')
-        .select('id, total, status, created_at')
-        .gte('created_at', today.toISOString())
-        .lt('created_at', tomorrow.toISOString())
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (ordersError) throw ordersError;
-
-      // Calculate stats
-      const todayOrders = ordersData?.length || 0;
-      const revenue = ordersData?.reduce((sum, order) => sum + parseFloat(order.total.toString()), 0) || 0;
-      
-      // Fetch menu items
-      const { data: itemsData, error: itemsError } = await supabase
-        .from('food_items')
-        .select('id, is_available');
-
-      if (itemsError) throw itemsError;
-
-      const totalItems = itemsData?.length || 0;
-      const activeItems = itemsData?.filter(item => item.is_available).length || 0;
-
-      // Format recent orders
-      const formattedOrders = (ordersData || []).map((order, index) => ({
-        id: order.id,
-        order_number: `#${String(1245 + (todayOrders - index - 1)).padStart(4, '0')}`,
-        total: parseFloat(order.total.toString()),
-        status: order.status,
-        created_at: order.created_at,
-      }));
-
-      setStats({
-        todayOrders,
-        revenue,
-        activeItems,
-        totalItems,
-      });
-      setRecentOrders(formattedOrders);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleExportCsv = () => {
+    const headers = ['Order ID', 'Date', 'Total (R)', 'Status'];
+    const rows = recentOrders.map((o) => [
+      o.id,
+      new Date(o.created_at).toLocaleString(),
+      o.total.toFixed(2),
+      o.status,
+    ]);
+    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-${getRangeLabel(dateRange).replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
-  const formatCurrency = (amount: number) => {
-    return `R ${amount.toFixed(2)}`;
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'text-status-success';
-      case 'preparing':
-        return 'text-status-warning';
-      case 'ready':
-        return 'text-status-info';
-      case 'pending':
-      case 'new':
-        return 'text-primary';
-      default:
-        return 'text-text-secondary';
-    }
-  };
-
-  if (loading) {
+  if (loading && recentOrders.length === 0) {
     return (
       <div className="p-8">
         <div className="heading text-text-primary mb-6">Dashboard</div>
@@ -120,74 +38,39 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="p-8">
-      <h1 className="heading-lg text-text-primary mb-6">Dashboard</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-bg-surface p-6 rounded-lg border border-border shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="heading-sm text-text-primary">Today's Orders</h3>
-            <HiOutlineClipboardList className="w-6 h-6 text-primary" />
-          </div>
-          <p className="heading-lg text-primary">{stats.todayOrders}</p>
-        </div>
-
-        <div className="bg-bg-surface p-6 rounded-lg border border-border shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="heading-sm text-text-primary">Revenue</h3>
-            <HiOutlineCurrencyDollar className="w-6 h-6 text-status-success" />
-          </div>
-          <p className="heading-lg text-status-success">{formatCurrency(stats.revenue)}</p>
-        </div>
-
-        <div className="bg-bg-surface p-6 rounded-lg border border-border shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="heading-sm text-text-primary">Active Items</h3>
-            <HiOutlineCube className="w-6 h-6 text-status-info" />
-          </div>
-          <p className="heading-lg text-status-info">
-            {stats.activeItems} / {stats.totalItems}
-          </p>
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
+        <h1 className="heading-lg text-text-primary">Dashboard</h1>
+        <div className="flex items-center gap-2 flex-wrap">
+          {(['today', '7days', '30days', 'month'] as DateRange[]).map((range) => (
+            <button
+              key={range}
+              type="button"
+              onClick={() => setDateRange(range)}
+              className={`px-4 py-2 body-sm font-medium rounded-md transition-colors ${
+                dateRange === range
+                  ? 'bg-primary text-white'
+                  : 'bg-bg-surface text-text-primary border border-border hover:bg-secondary'
+              }`}
+            >
+              {getRangeLabel(range)}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            className="flex items-center gap-2 px-4 py-2 body-sm font-medium text-text-primary bg-bg-surface border border-border rounded-md hover:bg-secondary transition-colors"
+          >
+            <HiOutlineDownload className="w-4 h-4" />
+            Export CSV
+          </button>
         </div>
       </div>
 
-      <div className="bg-bg-surface rounded-lg border border-border shadow-sm">
-        <div className="p-6 border-b border-border">
-          <h2 className="heading text-text-primary">Recent Orders</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-secondary">
-              <tr>
-                <th className="px-6 py-3 text-left body-sm font-semibold text-text-primary">Order #</th>
-                <th className="px-6 py-3 text-left body-sm font-semibold text-text-primary">Status</th>
-                <th className="px-6 py-3 text-right body-sm font-semibold text-text-primary">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {recentOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center body text-text-secondary">
-                    No orders today
-                  </td>
-                </tr>
-              ) : (
-                recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-secondary transition-colors">
-                    <td className="px-6 py-4 body text-text-primary">{order.order_number}</td>
-                    <td className="px-6 py-4">
-                      <span className={`body-sm font-medium capitalize ${getStatusColor(order.status)}`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right body font-semibold text-text-primary">
-                      {formatCurrency(order.total)}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+      <DashboardStatsCards dateRange={dateRange} stats={stats} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <RecentOrdersTable recentOrders={recentOrders} onExportCsv={handleExportCsv} />
+        <TopItemsList topItems={topItems} />
       </div>
     </div>
   );
