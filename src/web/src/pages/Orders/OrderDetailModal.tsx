@@ -1,15 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../api/supabaseClient';
 import { HiOutlineX, HiOutlineCheckCircle } from 'react-icons/hi';
-import { Order } from '../../types';
 import { OrderItem } from '../../types';
 import { FoodItem } from '../../types';
 import { canUpdateOrderStatus } from '../../utils/roleHelpers';
-
-// Extend Order type to include all possible statuses
-type ExtendedOrder = Omit<Order, 'status'> & {
-  status: 'pending' | 'new' | 'preparing' | 'ready' | 'completed' | 'cancelled';
-};
+import type { ExtendedOrder } from './ordersHelpers';
 
 interface OrderDetailModalProps {
   order: ExtendedOrder;
@@ -48,8 +43,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           food_item: item.food_items,
         }))
       );
-    } catch (error) {
-      console.error('Error fetching order items:', error);
+    } catch {
     } finally {
       setLoading(false);
     }
@@ -80,9 +74,10 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
       <div className="bg-bg-surface rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="heading text-text-primary">Order {order.id.slice(0, 8)}</h2>
+          <h2 className="heading text-text-primary">
+            Order {order.order_number != null ? `#${String(order.order_number).padStart(4, '0')}` : order.id.slice(0, 8)}
+          </h2>
           <button
             onClick={onClose}
             className="p-2 text-text-secondary hover:bg-secondary rounded-md transition-colors"
@@ -91,9 +86,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6 space-y-6">
-          {/* Order Items */}
           <div>
             <h3 className="heading-sm text-text-primary mb-4">Items</h3>
             {loading ? (
@@ -123,7 +116,6 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             )}
           </div>
 
-          {/* Order Total */}
           <div className="border-t border-border pt-4">
             <div className="flex items-center justify-between">
               <span className="heading-sm text-text-primary">Total</span>
@@ -133,7 +125,6 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Address if available */}
           {order.address && (
             <div>
               <h3 className="heading-sm text-text-primary mb-2">Delivery Address</h3>
@@ -141,7 +132,6 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             </div>
           )}
 
-          {/* Actions */}
           {canUpdateOrderStatus(userRole) && (nextAction || canCancel) && (
             <div className="flex gap-3 pt-4 border-t border-border">
               {nextAction && (
