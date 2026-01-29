@@ -1,0 +1,7 @@
+# Supabase project config (used by CLI for link, deploy, etc.)
+# https://supabase.com/docs/guides/functions/function-configuration
+
+# Disable gateway JWT verification for invite-user so the request reaches the function.
+# The function validates the JWT and checks admin role itself (getUser(token) + profiles.role).
+[functions.invite-user]
+verify_jwt = false
