@@ -11,13 +11,15 @@ module.exports = {
     icon: "./assets/images/icon.png",
     userInterfaceStyle: "light",
     newArchEnabled: true,
+    scheme: "restaurant-app",
     splash: {
       image: "./assets/images/splash-icon.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff"
     },
     ios: {
-      supportsTablet: true
+      supportsTablet: true,
+      bundleIdentifier: "com.restaurantapp.mobile"
     },
     android: {
       adaptiveIcon: {
@@ -25,7 +27,23 @@ module.exports = {
         backgroundColor: "#ffffff"
       },
       edgeToEdgeEnabled: true,
-      predictiveBackGestureEnabled: false
+      predictiveBackGestureEnabled: false,
+      package: "com.restaurantapp.mobile",
+      intentFilters: [
+        {
+          action: "VIEW",
+          autoVerify: true,
+          data: [
+            {
+              scheme: "restaurant-app"
+            }
+          ],
+          category: [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     web: {
       favicon: "./assets/images/favicon.png"

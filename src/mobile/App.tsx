@@ -4,6 +4,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider, useSelector } from 'react-redux';
 import { ToastProvider } from 'react-native-toast-notifications';
+import { useFonts } from 'expo-font';
+import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from '@expo-google-fonts/poppins';
 import { store, useAppDispatch, type RootState } from './store/index';
 import { checkAuthSession } from './store/slices/authSlice';
 import { supabase } from './api/supabaseClient';
@@ -88,6 +95,17 @@ function AppNavigator() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return <Loader fullscreen />;
+  }
+
   return (
     <Provider store={store}>
       <ToastProvider

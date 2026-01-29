@@ -1,22 +1,22 @@
 export const typography = {
-  // Heading Styles
+  // Heading Styles - Using Poppins font
   heading: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Poppins_600SemiBold',
     fontSize: 24,
     lineHeight: 32,
   },
   headingLarge: {
-    fontFamily: 'Inter_700Bold',
+    fontFamily: 'Poppins_700Bold',
     fontSize: 28,
     lineHeight: 36,
   },
   headingSmall: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Poppins_600SemiBold',
     fontSize: 20,
     lineHeight: 28,
   },
   headingXSmall: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Poppins_600SemiBold',
     fontSize: 18,
     lineHeight: 24,
   },
