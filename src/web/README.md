@@ -93,6 +93,21 @@ Run these from **`src/web/`**:
 
 ---
 
+## Deploy on Vercel
+
+The CMS works on [Vercel](https://vercel.com). The repo includes `vercel.json` so client-side routing (e.g. `/orders`, `/settings`) works when you refresh or open a link directly.
+
+1. **Import the repo** in Vercel (GitHub/GitLab/Bitbucket).
+2. **Set the root directory** to `src/web` (Project Settings → General → Root Directory).
+3. **Add environment variables** (Project Settings → Environment Variables):
+   - `VITE_SUPABASE_URL` — your Supabase project URL
+   - `VITE_SUPABASE_ANON_KEY` — your Supabase anon public key
+4. **Deploy.** Vercel will run `npm install` and `npm run build` from `src/web` and serve the `dist/` output.
+
+Use the same Supabase project and env values as in local development. No code changes are required.
+
+---
+
 ## Database setup (for CMS)
 
 The CMS needs the same Supabase project as the mobile app. In addition to the base schema and RLS, run these in the **Supabase SQL Editor** (from project root, in this order):
