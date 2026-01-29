@@ -14,6 +14,7 @@ import { Orders } from './pages/Orders/Orders';
 import { Menu } from './pages/Menu/Menu';
 import { Settings } from './pages/Settings/Settings';
 import { Users } from './pages/Users/Users';
+import { Payments } from './pages/Payments/Payments';
 
 const AuthInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useAppDispatch();
@@ -25,7 +26,6 @@ const AuthInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) 
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError) {
-        console.error('Session check error:', sessionError);
         dispatch(clearAuth());
         dispatch(setLoading(false));
         return;
@@ -34,7 +34,6 @@ const AuthInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) 
       if (session) {
         dispatch(setSession(session));
 
-        // Fetch user profile
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -42,20 +41,17 @@ const AuthInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) 
           .single();
 
         if (profileError || !profile) {
-          console.error('Profile lookup error:', profileError);
           dispatch(clearAuth());
           dispatch(setLoading(false));
           return;
         }
 
-        // Check if user is CMS user
         if (!isCMSUser(profile.role)) {
           dispatch(clearAuth());
           dispatch(setLoading(false));
           return;
         }
 
-        // Map profile to match Profile type
         const mappedProfile = {
           id: profile.id,
           auth_id: profile.auth_uid,
@@ -137,6 +133,7 @@ function App() {
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="orders" element={<Orders />} />
+              <Route path="payments" element={<Payments />} />
               <Route path="menu/*" element={<Menu />} />
               <Route path="settings" element={<Settings />} />
               <Route path="users" element={<Users />} />

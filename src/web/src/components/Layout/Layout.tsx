@@ -5,6 +5,7 @@ import {
   HiOutlineChartBar, 
   HiOutlineMenu, 
   HiOutlineClipboardList,
+  HiOutlineCurrencyDollar,
   HiOutlineCog,
   HiOutlineUsers
 } from 'react-icons/hi';
@@ -35,6 +36,12 @@ export const Layout = () => {
       label: 'Orders',
       icon: HiOutlineClipboardList,
       roles: ['admin', 'manager', 'staff'],
+    },
+    {
+      path: '/payments',
+      label: 'Payments',
+      icon: HiOutlineCurrencyDollar,
+      roles: ['admin', 'manager'],
     },
     {
       path: '/settings',

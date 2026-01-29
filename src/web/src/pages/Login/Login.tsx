@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../api/supabaseClient';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setUser, setSession, setError, setLoading } from '../../store/slices/authSlice';
+import { getErrorMessageForUser } from '../../utils/errorUtils';
 import { isCMSUser } from '../../utils/roleHelpers';
 
 export const Login: React.FC = () => {
@@ -25,7 +26,23 @@ export const Login: React.FC = () => {
       });
 
       if (error) {
-        dispatch(setError(error.message));
+        const isNetworkError =
+          error.message?.includes('Failed to fetch') ||
+          error.message?.includes('fetch') ||
+          error.name === 'AuthRetryableFetchError';
+        if (isNetworkError) {
+          dispatch(
+            setError(
+              'We couldn’t reach the server. Check your internet connection. If you use Supabase, check the dashboard in case the project is paused.'
+            )
+          );
+        } else if (error.message?.toLowerCase().includes('invalid login')) {
+          dispatch(setError('Invalid email or password. Please try again.'));
+        } else if (error.message?.toLowerCase().includes('email')) {
+          dispatch(setError('There was a problem with your email. Please check it and try again.'));
+        } else {
+          dispatch(setError('Sign-in failed. Please check your email and password and try again.'));
+        }
         setIsLoading(false);
         return;
       }
@@ -43,22 +60,21 @@ export const Login: React.FC = () => {
         .single();
 
       if (profileError) {
-        console.error('Profile fetch error:', profileError);
-        dispatch(setError(`Profile error: ${profileError.message}. Auth ID: ${data.session.user.id}`));
+        getErrorMessageForUser(profileError, '');
+        dispatch(setError('Your account could not be loaded. Please try again or contact support.'));
         setIsLoading(false);
         return;
       }
 
       if (!profile) {
-        console.error('Profile not found for auth_uid:', data.session.user.id);
-        dispatch(setError(`Profile not found for user. Please contact support. Auth ID: ${data.session.user.id}`));
+        dispatch(setError('Your account was not found. Please contact support.'));
         setIsLoading(false);
         return;
       }
 
       if (!isCMSUser(profile.role)) {
         await supabase.auth.signOut();
-        dispatch(setError('Access denied. This is a CMS for staff only.'));
+        dispatch(setError('Access denied. This dashboard is for staff, managers, and administrators only.'));
         setIsLoading(false);
         return;
       }
@@ -79,8 +95,8 @@ export const Login: React.FC = () => {
       dispatch(setSession(data.session));
       dispatch(setUser(mappedProfile));
       navigate('/dashboard');
-    } catch (error: any) {
-      dispatch(setError(error.message || 'An unexpected error occurred'));
+    } catch (err: unknown) {
+      dispatch(setError(getErrorMessageForUser(err, 'Something went wrong. Please try again.')));
     } finally {
       setIsLoading(false);
       dispatch(setLoading(false));
@@ -92,10 +108,13 @@ export const Login: React.FC = () => {
       <div className="max-w-md w-full bg-bg-surface rounded-lg shadow-lg p-8 space-y-6">
         <div className="text-center">
           <h2 className="heading-lg text-text-primary">
-            BiteX CMS Login
+            BiteX CMS
           </h2>
           <p className="mt-2 body-sm text-text-secondary">
-            Sign in to access the admin panel
+            Sign in to access the restaurant dashboard
+          </p>
+          <p className="mt-1 body-sm text-text-secondary opacity-90">
+            For staff, managers, and administrators
           </p>
         </div>
 

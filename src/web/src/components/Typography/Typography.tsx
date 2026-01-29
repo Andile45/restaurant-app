@@ -28,16 +28,6 @@ interface TypographyProps {
   as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div';
 }
 
-/**
- * Typography Component
- * 
- * Provides consistent typography matching the mobile app.
- * Uses Tailwind classes for styling.
- * 
- * @example
- * <Typography variant="heading" color="primary">Welcome</Typography>
- * <Typography variant="body" color="secondary">Description text</Typography>
- */
 export const Typography: React.FC<TypographyProps> = ({
   variant = 'body',
   color = 'primary',
@@ -47,14 +37,11 @@ export const Typography: React.FC<TypographyProps> = ({
 }) => {
   const baseClass = typographyClasses[variant] || 'body';
   const colorClass = `text-${color === 'primary' ? 'text-primary' : color === 'secondary' ? 'text-secondary' : 'text-inverse'}`;
-  
-  // Add Poppins font for headings
   const isHeading = variant.startsWith('heading');
   const fontClass = isHeading ? 'font-display' : '';
   
   const combinedClassName = `${baseClass} ${colorClass} ${fontClass} ${className}`.trim();
-  
-  // Determine the HTML element based on variant or 'as' prop
+
   const getElement = () => {
     if (as) return as;
     
@@ -69,8 +56,7 @@ export const Typography: React.FC<TypographyProps> = ({
   };
   
   const Element = getElement();
-  
-  // Render based on element type
+
   switch (Element) {
     case 'h1':
       return <h1 className={combinedClassName}>{children}</h1>;

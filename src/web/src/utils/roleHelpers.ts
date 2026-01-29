@@ -72,10 +72,10 @@ export const getRoleDisplayName = (role: string): string => {
 
 export const getRoleColor = (role: string): string => {
   const colors: Record<string, string> = {
-    user: '#3b82f6',      // Blue
-    admin: '#ef4444',     // Red
-    manager: '#f59e0b',   // Orange/Amber
-    staff: '#10b981',     // Green
+    user: '#3b82f6',
+    admin: '#ef4444',
+    manager: '#f59e0b',
+    staff: '#10b981',
   };
-  return colors[role] || '#6b7280'; // Gray as default
+  return colors[role] || '#6b7280';
 };
