@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi';
 import { supabase } from '../../api/supabaseClient';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setUser, setSession, setError, setLoading } from '../../store/slices/authSlice';
@@ -9,6 +10,7 @@ import { isCMSUser } from '../../utils/roleHelpers';
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -146,17 +148,31 @@ export const Login: React.FC = () => {
               <label htmlFor="password" className="block body-sm font-medium text-text-primary mb-2">
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="appearance-none relative block w-full px-4 py-3 border border-border placeholder-text-secondary text-text-primary bg-bg-surface rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors body"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  className="appearance-none relative block w-full px-4 py-3 pr-12 border border-border placeholder-text-secondary text-text-primary bg-bg-surface rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors body"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((p) => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-secondary hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 rounded transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <HiOutlineEyeOff className="w-5 h-5" />
+                  ) : (
+                    <HiOutlineEye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
