@@ -14,7 +14,6 @@ export const Menu: React.FC = () => {
         <h1 className="heading-lg text-text-primary">Menu</h1>
       </div>
 
-      {/* Sub-navigation */}
       <div className="flex gap-2 mb-6 border-b border-border">
         <Link
           to="/menu/categories"
@@ -40,7 +39,6 @@ export const Menu: React.FC = () => {
         </Link>
       </div>
 
-      {/* Routes */}
       <Routes>
         <Route index element={<Navigate to="/menu/categories" replace />} />
         <Route path="categories" element={<Categories />} />
