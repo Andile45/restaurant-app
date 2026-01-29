@@ -146,7 +146,7 @@ export function useUsers() {
           return;
         }
         if (res.status === 403) {
-          setError("You don't have permission to invite users.");
+          setError('You do not have permission to invite users.');
           return;
         }
         throw new Error(data?.error || 'Invite failed');

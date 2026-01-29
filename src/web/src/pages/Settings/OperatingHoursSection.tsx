@@ -1,6 +1,5 @@
 import { HiOutlineClock } from 'react-icons/hi';
 import { DAYS } from './settingsConstants';
-import type { DayKey } from './settingsConstants';
 import type { OperatingHours } from './useSettings';
 
 interface OperatingHoursSectionProps {
