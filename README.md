@@ -1,6 +1,7 @@
 # BiteX Restaurant App
 
-A mobile app for browsing menus, placing orders, and managing your account—built with React Native (Expo) and Supabase.
+- **Mobile app** — Customers browse menus, place orders, and manage their account (React Native + Expo + Supabase).
+- **Web (CMS)** — Staff, managers, and admins manage the restaurant: dashboard, orders, menu, settings, users, payments (React + Vite + Supabase).
 
 ---
 
@@ -76,6 +77,55 @@ Then scan the new QR code with Expo Go.
 
 ---
 
+## Web (CMS) — How to run
+
+The CMS is the admin dashboard for staff, managers, and administrators.
+
+**Quick run (from project root):**
+```bash
+cd src/web && npm install && npm run dev
+```
+Then open **http://localhost:3000** and log in with a user that has role `admin`, `manager`, or `staff`.
+
+---
+
+### 1. Go to the web app folder
+
+From the **project root** (`restaurant-app`):
+
+```bash
+cd src/web
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Environment variables
+
+Create a `.env` file inside `src/web/` with your Supabase values (same project as the mobile app):
+
+```env
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_public_key_here
+```
+
+Get these from **Supabase Dashboard** → your project → **Settings** → **API**.
+
+### 4. Start the dev server
+
+```bash
+npm run dev
+```
+
+The app opens at **http://localhost:3000**. Log in with a user whose profile has role `admin`, `manager`, or `staff` (see Database setup below).
+
+**Full web README:** For scripts, database setup for CMS, features, tech stack, and troubleshooting, see **[src/web/README.md](src/web/README.md)**.
+
+---
+
 ## Full setup (database and backend)
 
 To use login, orders, and payments, you need a Supabase project and the database set up.
@@ -98,8 +148,14 @@ In the Supabase **SQL Editor**, run the SQL files from the **project root** in t
 | 3 | `database-add-price-at-purchase.sql` | Price-at-purchase field |
 | 4 | `database-cleanup-duplicates.sql` | Optional: clean duplicates |
 | 5 | `database-seed-data.sql` | Sample menu and data |
+| 6 | `database-add-cms-roles.sql` | CMS roles (staff, manager, admin) and policies |
+| 7 | `database-restaurant-settings.sql` | Restaurant settings table (for CMS Settings page) |
+| 8 | `database-connect-restaurant-settings.sql` | Link restaurant_settings to orders/payments |
+| 9 | `database-order-number.sql` | Add order_number to orders (for receipts and CMS) |
 
 Run each script once, in order. If a script says something already exists, that’s usually fine.
+
+Run each script once, in order. If a script says something already exists, that's usually fine. Scripts 6–9 are required for the Web (CMS) to work fully (Settings, Payments, order numbers).
 
 ### 3. Database schema
 
@@ -216,7 +272,7 @@ For the complete SQL schema file, see **`Database-Schema.sql`** in the project r
 
 ## Available scripts
 
-Run these from **`src/mobile/`**:
+### Mobile app (from `src/mobile/`)
 
 | Command | What it does |
 |--------|----------------|
@@ -225,6 +281,15 @@ Run these from **`src/mobile/`**:
 | `npm run ios` | Start and open on iOS (Mac only) |
 | `npm run web` | Start and open in the browser |
 | `npx expo start --tunnel` | Start with tunnel (for remote devices) |
+
+### Web CMS (from `src/web/`)
+
+| Command | What it does |
+|--------|----------------|
+| `npm run dev` | Start dev server at http://localhost:3000 |
+| `npm run build` | Production build (output in `dist/`) |
+| `npm run preview` | Serve production build locally |
+| `npm run lint` | Run ESLint |
 
 ---
 
@@ -241,12 +306,9 @@ Run these from **`src/mobile/`**:
 
 ## Tech stack
 
-- **App**: React Native (Expo)  
-- **Backend**: Supabase (PostgreSQL + Auth)  
-- **State**: Redux Toolkit  
-- **Navigation**: React Navigation  
-- **Forms**: Formik + Yup  
-- **Icons**: @expo/vector-icons  
+- **Mobile**: React Native (Expo), Redux Toolkit, React Navigation, Formik + Yup, @expo/vector-icons  
+- **Web (CMS)**: React 19, TypeScript, Vite, Tailwind CSS v4, Redux Toolkit, React Router v7  
+- **Backend**: Supabase (PostgreSQL + Auth) for both apps  
 
 ---
 
@@ -263,6 +325,9 @@ Run these from **`src/mobile/`**:
 
 - **Database errors (RLS, missing table)**  
   Run the SQL scripts in the order listed in **Full setup** above.
+
+- **Web: “Failed to fetch” or blank CMS**  
+  Check `src/web/.env` (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY). Resume the Supabase project if it is paused. See [src/web/README.md](src/web/README.md) for more.
 
 ---
 
