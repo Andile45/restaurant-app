@@ -1,8 +1,6 @@
-// Define all types locally (cannot import from outside src/ in Create React App)
-
 export interface Profile {
   id: string;
-  auth_id: string; // supabase Auth uid
+  auth_id: string;
   name: string;
   surname: string;
   contact_number: string;
@@ -21,7 +19,7 @@ export interface Category {
 
 export interface FoodItem {
   id: string;
-  category_id: string; // Foreign key to category
+  category_id: string;
   name: string;
   description?: string;
   price: number;
@@ -37,8 +35,8 @@ export interface OrderItem {
   quantity: number;
   price_at_purchase: number;
   extras: {
-    add_ons?: string[];  // Optional extras added
-    remove?: string[];  // Optional items removed
+    add_ons?: string[];
+    remove?: string[];
     sides?: string[];
     drinks?: string[];
   };
@@ -47,19 +45,20 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
-  user_id: string; // Foreign Key to profiles
+  user_id: string;
   total: number;
-  status: 'pending' | 'completed' | 'cancelled'; // Matches database CHECK constraint
+  status: 'pending' | 'completed' | 'cancelled';
   address?: string;
   created_at: string;
   order_items?: OrderItem[];
+  order_number?: number | null;
 }
 
 export interface Payment {
   id: string;
   order_id: string;
   amount: number;
-  payment_status: 'pending' | 'completed' | 'failed'; // Matches database column name
+  payment_status: 'pending' | 'completed' | 'failed';
   method: 'card' | 'paypal' | 'voucher' | 'other';
   provider: 'stripe' | 'paypal' | 'paystack' | string;
   transaction_id?: string;
@@ -68,7 +67,6 @@ export interface Payment {
   created_at: string;
 }
 
-// Web-specific types
 export interface AuthState {
   user: Profile | null;
   session: any | null;
