@@ -3,8 +3,8 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 module.exports = {
   expo: {
-    name: "mobile",
-    slug: "mobile",
+    name: "Bite X",
+    slug: "bite-x",
     version: "1.0.0",
     main: "index.ts",
     orientation: "portrait",
@@ -15,7 +15,7 @@ module.exports = {
     splash: {
       image: "./assets/images/splash-icon.png",
       resizeMode: "contain",
-      backgroundColor: "#ffffff"
+      backgroundColor: "#00B4BF"
     },
     ios: {
       supportsTablet: true,
@@ -52,9 +52,13 @@ module.exports = {
       "expo-font"
     ],
     extra: {
+      eas: {
+        projectId: "dd114de3-f192-4522-b3d9-da23a25aead9"
+      },
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
       paystackPublicKey: process.env.EXPO_PUBLIC_PAYSTACK_PUBLIC_KEY,
+      googlePlacesApiKey: process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY,
     }
   }
 };
