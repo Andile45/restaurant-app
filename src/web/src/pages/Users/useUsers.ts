@@ -118,24 +118,18 @@ export function useUsers() {
       token = refreshed?.access_token;
     }
     if (!token) {
-      setError('You must be signed in to invite users. Try signing out and back in, then try again.');
+      setError('Your session may have expired. Please sign in again and try inviting the user.');
       return;
     }
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    if (!supabaseUrl || !anonKey) {
-      setError('Invite is not available right now. Please contact support.');
-      return;
-    }
+    setInviting(true);
+    setError(null);
     try {
-      setInviting(true);
-      setError(null);
-      const res = await fetch(`${supabaseUrl}/functions/v1/invite-user`, {
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invite-user`;
+      const res = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          apikey: anonKey,
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, role: inviteRole }),
       });
@@ -154,14 +148,13 @@ export function useUsers() {
       await fetchProfiles();
       handleCloseInvite();
     } catch (err: unknown) {
-      setError(getErrorMessageForUser(err, 'Invite could not be sent. Please try again or contact support.'));
+      setError(getErrorMessageForUser(err, 'Invite could not be sent. Please try again.'));
     } finally {
       setInviting(false);
     }
   };
 
   return {
-    currentUser,
     loading,
     error,
     roleFilter,
