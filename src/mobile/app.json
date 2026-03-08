@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Bite X",
+    "slug": "bite-x",
     "version": "1.0.0",
     "main": "index.ts",
     "orientation": "portrait",
