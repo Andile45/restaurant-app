@@ -10,7 +10,6 @@ import { Loader } from '../../components/Loader';
 import { ErrorDisplay } from '../../components/auth/ErrorDisplay';
 import { FoodItemCard } from '../../components/menu/FoodItemCard';
 import { CategoryTab } from '../../components/menu/CategoryTab';
-import { BrandLogo } from '../../components/BrandLogo';
 import type { FoodItem } from '../../../common/types/foodItem';
 
 export default function MenuScreen() {
@@ -46,7 +45,6 @@ export default function MenuScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>Menu</Text>
-        <BrandLogo variant="small" />
       </View>
 
       {error && (
