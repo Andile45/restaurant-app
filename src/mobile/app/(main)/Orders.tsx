@@ -11,7 +11,6 @@ import { SearchBar } from '../../components/home/SearchBar';
 import { Loader } from '../../components/Loader';
 import { ErrorDisplay } from '../../components/auth/ErrorDisplay';
 import { EmptyState } from '../../components/EmptyState';
-import { BrandLogo } from '../../components/BrandLogo';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import type { Order } from '../../../common/types/order';
@@ -112,7 +111,6 @@ export default function OrdersScreen() {
             </Text>
           )}
         </View>
-        <BrandLogo variant="small" />
       </View>
 
       {error && (
