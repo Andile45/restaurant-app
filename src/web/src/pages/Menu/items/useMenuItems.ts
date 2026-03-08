@@ -31,6 +31,7 @@ export function useMenuItems() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<FoodItem | null>(null);
   const [formData, setFormData] = useState<ItemFormData>(emptyForm);
+  const [saving, setSaving] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -119,6 +120,7 @@ export function useMenuItems() {
       alert('Please enter a valid price (a positive number).');
       return;
     }
+    setSaving(true);
     try {
       if (editingItem) {
         const { error } = await supabase
@@ -147,9 +149,12 @@ export function useMenuItems() {
         if (error) throw error;
       }
       setShowAddModal(false);
+      setEditingItem(null);
       fetchItems();
     } catch (err: unknown) {
       alert(getErrorMessageForUser(err, 'Item could not be saved. Please try again.'));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -162,6 +167,7 @@ export function useMenuItems() {
     items: filteredItems,
     categories,
     loading,
+    saving,
     searchQuery,
     setSearchQuery,
     selectedCategory,
