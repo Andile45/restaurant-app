@@ -6,6 +6,7 @@ interface CategoryModalProps {
   onCategoryNameChange: (name: string) => void;
   onClose: () => void;
   onSave: () => void;
+  saving?: boolean;
 }
 
 export const CategoryModal: React.FC<CategoryModalProps> = ({
@@ -14,6 +15,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   onCategoryNameChange,
   onClose,
   onSave,
+  saving = false,
 }) => {
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50">
@@ -31,20 +33,25 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
               className="w-full px-4 py-2 body border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Category name"
               autoFocus
+              disabled={saving}
             />
           </div>
           <div className="flex gap-3 justify-end">
             <button
+              type="button"
               onClick={onClose}
-              className="px-4 py-2 body-sm text-text-secondary hover:bg-secondary rounded-md transition-colors"
+              disabled={saving}
+              className="px-4 py-2 body-sm text-text-secondary hover:bg-secondary rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={onSave}
-              className="px-4 py-2 button-sm text-white bg-primary hover:opacity-90 rounded-md transition-opacity"
+              disabled={saving}
+              className="px-4 py-2 button-sm text-white bg-primary hover:opacity-90 rounded-md transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingCategory ? 'Save Changes' : 'Add Category'}
+              {saving ? 'Saving...' : editingCategory ? 'Save Changes' : 'Add Category'}
             </button>
           </div>
         </div>
