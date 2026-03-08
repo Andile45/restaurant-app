@@ -62,7 +62,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           textStyle,
         ]}
       >
-        BiteX
+        BITE-X
       </Text>
     </View>
   );
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   text: {
-    fontFamily: 'Inter_700Bold',
+    fontFamily: 'Poppins_700Bold',
     color: colors.primary,
   },
 });
