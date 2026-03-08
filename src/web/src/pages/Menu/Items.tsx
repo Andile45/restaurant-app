@@ -15,6 +15,7 @@ export const Items: React.FC = () => {
     editingItem,
     formData,
     setFormData,
+    saving,
     handleAdd,
     handleEdit,
     handleToggleAvailability,
@@ -53,6 +54,7 @@ export const Items: React.FC = () => {
           categories={categories}
           onClose={closeModal}
           onSave={handleSave}
+          saving={saving}
         />
       )}
     </div>
