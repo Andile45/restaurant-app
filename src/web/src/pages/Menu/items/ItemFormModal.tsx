@@ -9,6 +9,7 @@ interface ItemFormModalProps {
   categories: Category[];
   onClose: () => void;
   onSave: () => void;
+  saving?: boolean;
 }
 
 export const ItemFormModal: React.FC<ItemFormModalProps> = ({
@@ -18,14 +19,23 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
   categories,
   onClose,
   onSave,
+  saving = false,
 }) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!saving) onSave();
+  };
+
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
-      <div className="bg-bg-surface rounded-lg shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div
+        className="bg-bg-surface rounded-lg shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="heading text-text-primary mb-4">
           {editingItem ? 'Edit Menu Item' : 'Add Menu Item'}
         </h2>
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block label text-text-primary mb-2">Name *</label>
             <input
@@ -108,19 +118,22 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
           </div>
           <div className="flex gap-3 justify-end pt-4 border-t border-border">
             <button
+              type="button"
               onClick={onClose}
-              className="px-4 py-2 body-sm text-text-secondary hover:bg-secondary rounded-md transition-colors"
+              disabled={saving}
+              className="px-4 py-2 body-sm text-text-secondary hover:bg-secondary rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
-              onClick={onSave}
-              className="px-4 py-2 button-sm text-white bg-primary hover:opacity-90 rounded-md transition-opacity"
+              type="submit"
+              disabled={saving}
+              className="px-4 py-2 button-sm text-white bg-primary hover:opacity-90 rounded-md transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingItem ? 'Save Changes' : 'Add Item'}
+              {saving ? 'Saving...' : editingItem ? 'Save Changes' : 'Add Item'}
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
