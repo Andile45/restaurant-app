@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store/index';
-import { updateQuantity, removeFromCart, clearCart } from '../../store/slices/cartSlice';
+import { updateQuantity, removeFromCart } from '../../store/slices/cartSlice';
 import { createOrder } from '../../store/slices/orderSlice';
 import { CustomButton } from '../../components/Button';
 import { CartItemCard } from '../../components/cart/CartItemCard';
+import { AddressAutocomplete } from '../../components';
 import { EmptyState } from '../../components/EmptyState';
-import { BrandLogo } from '../../components/BrandLogo';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { formatPrice } from '../../utils/formatPrice';
@@ -32,6 +33,14 @@ export default function CartScreen() {
   const { user } = useAppSelector((state) => state.auth);
   const { isLoading } = useAppSelector((state) => state.order);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+
+  // Pre-fill from profile only when empty; don't overwrite a selection the user just made
+  useEffect(() => {
+    if (user?.address) {
+      setDeliveryAddress((prev) => (prev.trim() ? prev : user.address));
+    }
+  }, [user?.address]);
 
   const handleUpdateQuantity = (cartItemId: string, quantity: number) => {
     dispatch(updateQuantity({ cartItemId, quantity }));
@@ -61,6 +70,11 @@ export default function CartScreen() {
       Alert.alert('Empty Cart', 'Your cart is empty');
       return;
     }
+    const addressToUse = deliveryAddress.trim() || user.address?.trim();
+    if (!addressToUse) {
+      Alert.alert('Delivery address required', 'Please enter your delivery address below so we know where to send your order.');
+      return;
+    }
 
     setIsCheckingOut(true);
     try {
@@ -71,7 +85,7 @@ export default function CartScreen() {
         price: item.price,
       }));
 
-      const order = await dispatch(createOrder(user.id, orderItems, total, user.address || undefined));
+      const order = await dispatch(createOrder(user.id, orderItems, total, addressToUse));
       
       if (order && order.id) {
         navigation.navigate('Payment', {
@@ -114,7 +128,24 @@ export default function CartScreen() {
           <ScrollView
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
+            {/* Delivery address */}
+            <View style={styles.addressSection}>
+              <View style={styles.addressLabelRow}>
+                <Ionicons name="location-outline" size={20} color={colors.primary} />
+                <Text style={styles.addressLabel}>Delivery address</Text>
+              </View>
+              <AddressAutocomplete
+                value={deliveryAddress}
+                onSelectAddress={setDeliveryAddress}
+                placeholder="Search for your address"
+              />
+              {!user?.address && (
+                <Text style={styles.addressHint}>Saved in Profile for next time</Text>
+              )}
+            </View>
+
             {items.map((item) => (
               <CartItemCard
                 key={item.cartItemId}
@@ -173,6 +204,27 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 100,
+  },
+  addressSection: {
+    marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  addressLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  addressLabel: {
+    ...typography.label,
+    color: colors.textPrimary,
+  },
+  addressHint: {
+    ...typography.captionSmall,
+    color: colors.textSecondary,
+    marginTop: 6,
   },
   footer: {
     position: 'absolute',
