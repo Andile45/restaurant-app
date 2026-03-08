@@ -13,20 +13,8 @@ import { RecentFavoriteCard } from '../../components/home/RecentFavoriteCard';
 import { FoodItemCard } from '../../components/menu/FoodItemCard';
 import { CategoryTab } from '../../components/menu/CategoryTab';
 import { EmptyState } from '../../components/EmptyState';
-import { BrandLogo } from '../../components/BrandLogo';
 import type { FoodItem } from '../../../common/types/foodItem';
 import type { Order } from '../../../common/types/order';
-
-const getTimeBasedGreeting = (): string => {
-  const hour = new Date().getHours();
-  if (hour < 12) {
-    return 'Good morning';
-  } else if (hour < 17) {
-    return 'Good afternoon';
-  } else {
-    return 'Good evening';
-  }
-};
 
 export default function HomeScreen() {
   const dispatch = useAppDispatch();
@@ -35,7 +23,6 @@ export default function HomeScreen() {
   const { foodItems, categories } = useAppSelector((state) => state.menu);
   const { orders } = useAppSelector((state) => state.order);
   const [searchQuery, setSearchQuery] = useState('');
-  const [greeting] = useState(getTimeBasedGreeting());
   
   useEffect(() => {
     if (foodItems.length === 0) {
@@ -145,10 +132,10 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.content}>
         <View style={styles.headerRow}>
-          <View style={styles.greetingContainer}>
-            <Text style={styles.title}>{greeting}, {user?.name}!</Text>
+          <View style={styles.heroContainer}>
+            <Text style={styles.heroTitle}>Hungry?</Text>
+            <Text style={styles.heroSubtitle}>Order and Eat</Text>
           </View>
-          <BrandLogo variant="small" />
         </View>
         
         <View style={styles.searchContainer}>
@@ -268,17 +255,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 20,
   },
-  greetingContainer: {
+  heroContainer: {
     flex: 1,
+    justifyContent: 'center',
   },
-  title: {
-    ...typography.heading,
-    fontFamily: 'Inter_700Bold',
-    fontSize: 28,
-    fontWeight: '800',
+  heroTitle: {
+    fontFamily: 'Poppins_700Bold',
+    fontSize: 34,
+    lineHeight: 40,
     color: colors.textPrimary,
+    letterSpacing: -0.5,
+  },
+  heroSubtitle: {
+    fontFamily: 'Poppins_500Medium',
+    fontSize: 18,
+    lineHeight: 26,
+    color: colors.primary,
+    marginTop: 4,
+    letterSpacing: 0.3,
   },
   searchContainer: {
     marginBottom: 16,
