@@ -8,6 +8,7 @@ import { useToast } from 'react-native-toast-notifications';
 import { useAppDispatch, useAppSelector } from '../../store/index';
 import { updateProfile } from '../../store/slices/authSlice';
 import { Input } from '../../components/Input';
+import { AddressAutocomplete } from '../../components';
 import { CustomButton } from '../../components/Button';
 import { ErrorDisplay } from '../../components/auth/ErrorDisplay';
 import { colors } from '../../theme/colors';
@@ -98,7 +99,7 @@ export default function EditProfileScreen() {
             onSubmit={handleUpdateProfile}
             enableReinitialize
           >
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            {({ handleChange, handleBlur, handleSubmit, setFieldValue, setFieldTouched, values, errors, touched }) => (
               <View style={styles.form}>
                 {/* Name Field */}
                 <View style={styles.fieldContainer}>
@@ -145,15 +146,16 @@ export default function EditProfileScreen() {
                   )}
                 </View>
 
-                {/* Address Field */}
+                {/* Address Field - validated with Google Maps */}
                 <View style={styles.fieldContainer}>
-                  <Text style={styles.label}>Address (Optional)</Text>
-                  <Input
-                    placeholder="Enter your delivery address"
+                  <Text style={styles.label}>Delivery address</Text>
+                  <AddressAutocomplete
                     value={values.address}
-                    onChangeText={handleChange('address')}
-                    onBlur={handleBlur('address')}
-                    autoCapitalize="words"
+                    onSelectAddress={(address) => {
+                      setFieldValue('address', address);
+                      setFieldTouched('address', true);
+                    }}
+                    placeholder="Search for your address"
                   />
                   {errors.address && touched.address && (
                     <Text style={styles.errorText}>{errors.address}</Text>
