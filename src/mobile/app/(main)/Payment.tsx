@@ -12,7 +12,6 @@ import { createPayment } from '../../store/slices/paymentSlice';
 import { updateOrderStatusInDb, verifyOrderForPayment } from '../../store/slices/orderSlice';
 import { clearCart } from '../../store/slices/cartSlice';
 import { CustomButton } from '../../components/Button';
-import { BrandLogo } from '../../components/BrandLogo';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { formatPrice } from '../../utils/formatPrice';
@@ -595,7 +594,6 @@ export default function PaymentScreen() {
             <Ionicons name="close" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <View style={styles.webViewHeaderCenter}>
-            <BrandLogo variant="compact" />
             <Text style={styles.webViewTitle}>Complete Payment</Text>
           </View>
           <View style={styles.closeButton} />
