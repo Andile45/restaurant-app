@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider, useSelector } from 'react-redux';
@@ -15,6 +16,7 @@ import { store, useAppDispatch, type RootState } from './store/index';
 import { checkAuthSession } from './store/slices/authSlice';
 import { supabase } from './api/supabaseClient';
 import { Loader } from './components/Loader';
+import { AppSplashScreen } from './components/AppSplashScreen';
 import { colors } from './theme/colors';
 import LoginScreen from './app/(auth)/login';
 import RegisterScreen from './app/(auth)/register';
@@ -94,7 +96,10 @@ function AppNavigator() {
   );
 }
 
+const SPLASH_MIN_MS = 1500;
+
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -102,8 +107,25 @@ export default function App() {
     Poppins_700Bold,
   });
 
-  if (!fontsLoaded) {
-    return <Loader fullscreen />;
+  useEffect(() => {
+    if (!fontsLoaded) return;
+    const hideNative = (): void => {
+      SplashScreen.hideAsync().catch(() => {});
+    };
+    const timer = setTimeout(() => {
+      hideNative();
+      setShowSplash(false);
+    }, SPLASH_MIN_MS);
+    return () => clearTimeout(timer);
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded || showSplash) {
+    return (
+      <>
+        <StatusBar style="light" />
+        <AppSplashScreen />
+      </>
+    );
   }
 
   return (
