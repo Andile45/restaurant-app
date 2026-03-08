@@ -9,6 +9,7 @@ export function useCategories() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryName, setCategoryName] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -43,6 +44,7 @@ export function useCategories() {
 
   const handleSave = async () => {
     if (!categoryName.trim()) return;
+    setSaving(true);
     try {
       if (editingCategory) {
         const { error } = await supabase
@@ -62,6 +64,8 @@ export function useCategories() {
       fetchCategories();
     } catch (err: unknown) {
       alert(getErrorMessageForUser(err, 'Category could not be saved. Please try again.'));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -90,6 +94,7 @@ export function useCategories() {
   return {
     categories,
     loading,
+    saving,
     showAddModal,
     editingCategory,
     categoryName,
