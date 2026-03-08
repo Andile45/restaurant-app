@@ -6,6 +6,7 @@ export const Categories: React.FC = () => {
   const {
     categories,
     loading,
+    saving,
     showAddModal,
     editingCategory,
     categoryName,
@@ -42,6 +43,7 @@ export const Categories: React.FC = () => {
           onCategoryNameChange={setCategoryName}
           onClose={closeModal}
           onSave={handleSave}
+          saving={saving}
         />
       )}
     </div>
