@@ -4,11 +4,11 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 module.exports = {
   expo: {
     name: "Bite X",
-    slug: "bite-x",
+    slug: "mobile",
     version: "1.0.0",
     main: "index.ts",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
+    icon: "./assets/images/splash-icon.png",
     userInterfaceStyle: "light",
     newArchEnabled: true,
     scheme: "restaurant-app",
@@ -23,8 +23,8 @@ module.exports = {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/adaptive-icon.png",
-        backgroundColor: "#ffffff"
+        foregroundImage: "./assets/images/splash-icon.png",
+        backgroundColor: "#00B4BF"
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
@@ -46,7 +46,7 @@ module.exports = {
       ]
     },
     web: {
-      favicon: "./assets/images/favicon.png"
+      favicon: "./assets/images/splash-icon.png"
     },
     plugins: [
       "expo-font"

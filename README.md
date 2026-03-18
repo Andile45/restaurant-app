@@ -5,6 +5,14 @@
 
 ---
 
+## What's new
+
+- **Android APK build** — You can build a release APK locally (Gradle) or via EAS (cloud). From `src/mobile/`: `npm run build:apk:eas` for EAS, or set `ANDROID_HOME` and run `npm run build:apk:gradle` for a local build. Full steps: **[src/mobile/BUILD-APK.md](src/mobile/BUILD-APK.md)**.
+- **App icon** — The app icon (home screen, Android adaptive icon, web favicon) is the BiteX “BX” on teal image: `src/mobile/assets/images/splash-icon.png`, configured in `app.config.js`. After changing it, run `npx expo prebuild --platform android` then rebuild the APK to see updates.
+- **CMS credentials** — Default CMS logins (admin, manager, staff) are listed in the [Web (CMS)](#web-cms--how-to-run) section below. Change passwords in production.
+
+---
+
 ## What you need before you start
 
 - **Node.js** (v18 or newer) — [Download](https://nodejs.org/)
@@ -86,6 +94,18 @@ The CMS is the admin dashboard for staff, managers, and administrators.
 cd src/web && npm install && npm run dev
 ```
 Then open **http://localhost:3000** and log in with a user that has role `admin`, `manager`, or `staff`.
+
+#### CMS credentials
+
+Use these accounts to log in to the CMS (after the database and seed/role scripts are run):
+
+| Role    | Email              | Password  |
+|---------|--------------------|-----------|
+| Admin   | admin@bitex.com    | BiteX@45  |
+| Manager | manager@bitex.com  | BiteX@45  |
+| Staff   | staff@bitex.com    | BiteX@45  |
+
+> Change these passwords in production. Ensure the corresponding users exist in Supabase Auth and that their `profiles` have the correct `role` (see `database-add-cms-roles.sql` and seed data).
 
 ---
 
@@ -281,6 +301,11 @@ For the complete SQL schema file, see **`Database-Schema.sql`** in the project r
 | `npm run ios` | Start and open on iOS (Mac only) |
 | `npm run web` | Start and open in the browser |
 | `npx expo start --tunnel` | Start with tunnel (for remote devices) |
+| `npm run prebuild` | Generate/update native `android/` (e.g. after changing icon) |
+| `npm run build:apk:eas` | Build Android APK via EAS (cloud; needs `eas-cli` and login) |
+| `npm run build:apk:gradle` | Build Android release APK locally (needs `ANDROID_HOME` set) |
+
+See **[src/mobile/BUILD-APK.md](src/mobile/BUILD-APK.md)** for full APK build steps.
 
 ### Web CMS (from `src/web/`)
 
