@@ -1,3 +1,6 @@
+/**
+ * Root component: splash handling, font loading, Redux + Toast providers, and auth-gated navigation.
+ */
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -28,26 +31,18 @@ import EditProfileScreen from './app/(main)/EditProfile';
 
 const Stack = createNativeStackNavigator();
 
+/** Auth-aware navigator: login/register/forgot when logged out, main tabs + modals when logged in */
 function AppNavigator() {
   const dispatch = useAppDispatch();
   const { isAuthenticated, isLoading } = useSelector((state: RootState) => state.auth);
 
+  // Sync auth state with Supabase and keep Redux in sync on sign in/out
   useEffect(() => {
     dispatch(checkAuthSession());
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        dispatch(checkAuthSession());
-      } else {
-        dispatch(checkAuthSession());
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      dispatch(checkAuthSession());
     });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [dispatch]);
 
   if (isLoading) {
@@ -96,6 +91,7 @@ function AppNavigator() {
   );
 }
 
+/** Minimum time (ms) to show in-app splash while fonts load */
 const SPLASH_MIN_MS = 1500;
 
 export default function App() {
@@ -107,11 +103,10 @@ export default function App() {
     Poppins_700Bold,
   });
 
+  // Hide native splash and in-app splash after fonts are ready and min time has passed
   useEffect(() => {
     if (!fontsLoaded) return;
-    const hideNative = (): void => {
-      SplashScreen.hideAsync().catch(() => {});
-    };
+    const hideNative = (): void => { SplashScreen.hideAsync().catch(() => {}); };
     const timer = setTimeout(() => {
       hideNative();
       setShowSplash(false);
@@ -119,6 +114,7 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [fontsLoaded]);
 
+  // Show in-app BX splash until fonts loaded and SPLASH_MIN_MS elapsed
   if (!fontsLoaded || showSplash) {
     return (
       <>

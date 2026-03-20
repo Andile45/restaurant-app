@@ -1,3 +1,6 @@
+/**
+ * App-wide color palette. Primary teal (#00B4BF) matches brand and splash.
+ */
 export const colors = {
   // Primary Brand Colors
   primary: '#00B4BF',       // The vibrant teal used in buttons and the logo

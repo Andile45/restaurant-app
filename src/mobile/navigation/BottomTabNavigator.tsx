@@ -1,3 +1,7 @@
+/**
+ * Bottom tab navigator for logged-in users: Home, Menu, Cart, Orders, Profile.
+ * Badge on Cart tab shows item count from Redux cart.
+ */
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';

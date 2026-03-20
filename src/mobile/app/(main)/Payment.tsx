@@ -317,7 +317,7 @@ export default function PaymentScreen() {
           }
           paymentRecordCreated = true;
         } catch (dbError: any) {
-          // Payment succeeded but payment record creation failed
+          // Payment succeeded but payment record creation failedy
           Alert.alert(
             'Payment Processed',
             `Your payment was successful, but there was an issue recording it. Please contact support with your payment reference: ${paymentResponse.data.reference}`,

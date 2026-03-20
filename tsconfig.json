@@ -17,12 +17,15 @@
     "module": "es2015",
     "moduleResolution": "bundler",
     "noEmit": true,
-    "lib": ["esnext"]
+    "lib": [
+      "esnext"
+    ]
   },
   "exclude": [
     "node_modules",
     "**/node_modules",
     "**/dist",
     "**/build"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }

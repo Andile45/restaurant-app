@@ -1,3 +1,6 @@
+/**
+ * In-app splash: BX logo on teal background, shown until fonts load and min delay (see App.tsx).
+ */
 import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { colors } from '../theme/colors';

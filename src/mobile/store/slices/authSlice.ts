@@ -1,3 +1,7 @@
+/**
+ * Auth slice: user, session, loading, errors, and registration success state.
+ * Thunks (login, register, logout, checkAuthSession, etc.) live in authThunks.
+ */
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Profile } from '../../../common/types/profile';
 
