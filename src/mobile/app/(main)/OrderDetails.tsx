@@ -25,8 +25,16 @@ const getStatusColor = (status: Order['status']) => {
   switch (status) {
     case 'completed':
       return '#4CAF50';
+    case 'ready':
+      return '#2196F3';
     case 'pending':
       return '#FF9800';
+    case 'new':
+      return '#9C27B0';
+    case 'preparing':
+      return '#FFC107';
+    case 'payment_failed':
+      return '#E91E63';
     case 'cancelled':
       return '#F44336';
     default:
@@ -38,12 +46,41 @@ const getStatusIcon = (status: Order['status']) => {
   switch (status) {
     case 'completed':
       return 'checkmark-circle';
+    case 'ready':
+      return 'information-circle';
     case 'pending':
       return 'time';
+    case 'new':
+      return 'lock-open-outline';
+    case 'preparing':
+      return 'flame';
+    case 'payment_failed':
+      return 'alert-circle';
     case 'cancelled':
       return 'close-circle';
     default:
       return 'help-circle';
+  }
+};
+
+const getStatusLabel = (status: Order['status']) => {
+  switch (status) {
+    case 'pending':
+      return 'Pending payment';
+    case 'new':
+      return 'Pending preparation';
+    case 'preparing':
+      return 'Preparing';
+    case 'ready':
+      return 'Ready';
+    case 'completed':
+      return 'Completed';
+    case 'cancelled':
+      return 'Cancelled';
+    case 'payment_failed':
+      return 'Payment failed';
+    default:
+      return status;
   }
 };
 
@@ -167,7 +204,7 @@ export default function OrderDetailsScreen() {
             <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
               <Ionicons name={statusIcon} size={16} color={statusColor} />
               <Text style={[styles.statusText, { color: statusColor }]}>
-                {currentOrder.status.charAt(0).toUpperCase() + currentOrder.status.slice(1)}
+                {getStatusLabel(currentOrder.status)}
               </Text>
             </View>
           </View>

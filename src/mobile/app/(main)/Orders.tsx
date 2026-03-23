@@ -137,7 +137,18 @@ export default function OrdersScreen() {
             contentContainerStyle={styles.filterContainer}
             style={styles.filterScrollView}
           >
-            {(['all', 'pending', 'completed', 'cancelled'] as OrderStatus[]).map((status) => (
+            {(
+              [
+                'all',
+                'pending',
+                'payment_failed',
+                'new',
+                'preparing',
+                'ready',
+                'completed',
+                'cancelled',
+              ] as OrderStatus[]
+            ).map((status) => (
               <TouchableOpacity
                 key={status}
                 style={[
@@ -153,7 +164,15 @@ export default function OrdersScreen() {
                     statusFilter === status && styles.filterChipTextActive,
                   ]}
                 >
-                  {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                  {status === 'all'
+                    ? 'All'
+                    : status === 'pending'
+                      ? 'Pending payment'
+                      : status === 'payment_failed'
+                        ? 'Payment failed'
+                        : status === 'new'
+                          ? 'Pending preparation'
+                          : status.charAt(0).toUpperCase() + status.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}

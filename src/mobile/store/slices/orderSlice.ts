@@ -265,11 +265,18 @@ export const createOrder = (
     if (orderError) throw orderError;
 
     const orderItems = items.map(item => {
+      const priceAtPurchase = item.price ?? priceMap.get(item.food_id);
+      if (priceAtPurchase == null) {
+        throw new Error(`Missing price for order item ${item.food_id}`);
+      }
+
       return {
         order_id: order.id,
         food_id: item.food_id,
         quantity: item.quantity,
         extras: item.extras || {},
+        // Persist the price at purchase time so UI/CMS displays correct per-item pricing
+        price_at_purchase: priceAtPurchase,
       };
     });
 

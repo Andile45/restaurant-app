@@ -18,7 +18,9 @@ import { formatPrice } from '../../utils/formatPrice';
 
 // Check if running in Expo Go (matches paystack.api.ts logic)
 const isExpoGo = Constants.executionEnvironment === 'storeClient';
-const USE_WEBVIEW_PAYMENT = isExpoGo || Platform.OS === 'web';
+// Use the Paystack WebView flow everywhere (including Android APK builds).
+// This avoids native-module crashes on Android and keeps the payment flow consistent.
+const USE_WEBVIEW_PAYMENT = true;
 
 interface PaymentRouteParams {
   orderId: string;
@@ -212,7 +214,14 @@ export default function PaymentScreen() {
   };
 
   const handlePayment = async () => {
-    // For WebView payment (Expo Go), skip card validation - Paystack handles it
+    // Payment flow (single source of truth):
+    // 1) Verify the order is still `pending` and matches the amount.
+    // 2) Create a Paystack reference for traceability.
+    // 3) Open the Paystack WebView (works reliably on Android APK too).
+    // 4) On success: record the payment and move the order to `new`
+    //    (paid, awaiting staff acceptance/preparation).
+    // 5) On cancel/failure: move the order out of `pending` to `payment_failed`
+    //    so it never appears as "awaiting payment" indefinitely.
     if (!USE_WEBVIEW_PAYMENT) {
       // 1. Validate form (only for native SDK)
       if (!validateForm()) {
@@ -336,9 +345,17 @@ export default function PaymentScreen() {
 
         // 9. Update order status ONLY if payment record was created successfully
         try {
-          await dispatch(updateOrderStatusInDb(orderId, 'completed'));
+          // Payment succeeded: mark order as paid but not yet accepted/preparing.
+          await dispatch(updateOrderStatusInDb(orderId, 'new'));
         } catch (orderError: any) {
           // Payment and payment record succeeded but order update failed
+          // If we can't move the order out of `pending`, users/admins would see it as stuck.
+          // Best-effort cleanup: mark the order as `payment_failed` to unblock the UI.
+          try {
+            await dispatch(updateOrderStatusInDb(orderId, 'payment_failed'));
+          } catch (cleanupError: any) {
+            console.error('Cleanup: failed to mark order payment_failed', cleanupError);
+          }
           Alert.alert(
             'Payment Recorded',
             `Your payment was processed and recorded, but there was an issue updating your order status. Please contact support with your payment reference: ${paymentResponse.data.reference}`,
@@ -377,7 +394,14 @@ export default function PaymentScreen() {
         );
       } else {
         // Payment failed
-        Alert.alert('Payment Failed', paymentResponse.message || 'Payment could not be processed');
+        try {
+          await dispatch(updateOrderStatusInDb(orderId, 'payment_failed'));
+        } catch (cleanupError: any) {
+          console.error('Cleanup: failed to mark order payment_failed', cleanupError);
+        }
+        const paymentErrorMessage =
+          paymentResponse.message || JSON.stringify(paymentResponse);
+        Alert.alert('Payment Failed', paymentErrorMessage);
       }
     } catch (error: any) {
       // Handle payment errors
@@ -385,7 +409,7 @@ export default function PaymentScreen() {
         // Payment succeeded but something else failed
         Alert.alert(
           'Payment Processed',
-          `Your payment was successful, but there was an issue completing your order. Please contact support with your payment reference: ${paymentReference || 'N/A'}`,
+          `Your payment was successful, but there was an issue completing your order. Please contact support with your payment reference: ${paymentReference}`,
           [
             {
               text: 'OK',
@@ -401,7 +425,13 @@ export default function PaymentScreen() {
         );
       } else {
         // Payment failed - don't clear cart
-        Alert.alert('Payment Error', error.message || 'An error occurred during payment');
+        try {
+          await dispatch(updateOrderStatusInDb(orderId, 'payment_failed'));
+        } catch (cleanupError: any) {
+          console.error('Cleanup: failed to mark order payment_failed', cleanupError);
+        }
+        const paymentErrorMessage = error?.message || String(error);
+        Alert.alert('Payment Error', paymentErrorMessage);
       }
     } finally {
       setIsProcessing(false);
@@ -483,9 +513,16 @@ export default function PaymentScreen() {
 
           // Update order status ONLY if payment record was created successfully
           try {
-            await dispatch(updateOrderStatusInDb(orderId, 'completed'));
+          // Payment succeeded: mark order as paid but not yet accepted/preparing.
+          await dispatch(updateOrderStatusInDb(orderId, 'new'));
           } catch (orderError: any) {
             // Payment and payment record succeeded but order update failed
+          // Best-effort cleanup to avoid leaving the order stuck as `pending`.
+          try {
+            await dispatch(updateOrderStatusInDb(orderId, 'payment_failed'));
+          } catch (cleanupError: any) {
+            console.error('Cleanup: failed to mark order payment_failed', cleanupError);
+          }
             setShowWebView(false);
             Alert.alert(
               'Payment Recorded',
@@ -545,15 +582,25 @@ export default function PaymentScreen() {
           setIsProcessing(false);
         }
       } else if (message.type === 'cancelled') {
+        try {
+          await dispatch(updateOrderStatusInDb(orderId, 'payment_failed'));
+        } catch (cleanupError: any) {
+          console.error('Cleanup: failed to mark order payment_failed', cleanupError);
+        }
         setShowWebView(false);
         setIsProcessing(false);
-        Alert.alert('Payment Cancelled', 'Payment was cancelled. You can try again.');
+        Alert.alert('Payment Cancelled', message.message || 'Payment was cancelled.');
       }
     } catch (error) {
       console.error('Error handling WebView message:', error);
+      try {
+        await dispatch(updateOrderStatusInDb(orderId, 'payment_failed'));
+      } catch (cleanupError: any) {
+        console.error('Cleanup: failed to mark order payment_failed', cleanupError);
+      }
       setShowWebView(false);
       setIsProcessing(false);
-      Alert.alert('Error', 'An error occurred processing the payment response.');
+      Alert.alert('Payment Response Error', (error as any)?.message || String(error));
     }
   };
 
@@ -584,7 +631,15 @@ export default function PaymentScreen() {
                   {
                     text: 'Yes',
                     style: 'destructive',
-                    onPress: () => setShowWebView(false),
+                    onPress: async () => {
+                      setIsProcessing(false);
+                      setShowWebView(false);
+                      try {
+                        await dispatch(updateOrderStatusInDb(orderId, 'payment_failed'));
+                      } catch (cleanupError: any) {
+                        console.error('Cleanup: failed to mark order payment_failed', cleanupError);
+                      }
+                    },
                   },
                 ]
               );
