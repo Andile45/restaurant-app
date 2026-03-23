@@ -47,10 +47,32 @@ create table orders (
     id uuid primary key default uuid_generate_v4(),
     user_id uuid not null references profiles(id) on delete cascade,
     total numeric(10,2) not null,
-    status text default 'pending', -- 'pending', 'completed', 'cancelled'
+    status text default 'pending',
+    -- Order lifecycle statuses:
+    -- 'pending' = awaiting payment
+    -- 'new' = paid, awaiting staff preparation/acceptance
+    -- 'preparing' -> 'ready' -> 'completed' = staff progression
+    -- 'payment_failed' = payment attempt failed/cancelled after order creation
     address text,
     created_at timestamp default current_timestamp
 );
+
+-- Ensure valid order.status values.
+-- This is required because the app uses more statuses than the original schema.
+ALTER TABLE orders DROP CONSTRAINT IF EXISTS order_status_check;
+ALTER TABLE orders
+  ADD CONSTRAINT order_status_check
+  CHECK (
+    status IN (
+      'pending',
+      'new',
+      'preparing',
+      'ready',
+      'completed',
+      'cancelled',
+      'payment_failed'
+    )
+  );
 
 ------------------------------------------------------
 -- 5️⃣ Order Items Table
@@ -60,6 +82,7 @@ create table order_items (
     order_id uuid not null references orders(id) on delete cascade,
     food_id uuid not null references food_items(id) on delete restrict,
     quantity int default 1,
+    price_at_purchase numeric(10,2),
     extras jsonb, -- sides, drinks, add-ons, removals
     created_at timestamp default current_timestamp
 );
