@@ -10,6 +10,7 @@ export function useCategories() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryName, setCategoryName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fetchCategories = async () => {
     try {
@@ -46,6 +47,7 @@ export function useCategories() {
     if (!categoryName.trim()) return;
     setSaving(true);
     try {
+      setErrorMessage(null);
       if (editingCategory) {
         const { error } = await supabase
           .from('categories')
@@ -63,7 +65,8 @@ export function useCategories() {
       setEditingCategory(null);
       fetchCategories();
     } catch (err: unknown) {
-      alert(getErrorMessageForUser(err, 'Category could not be saved. Please try again.'));
+      const message = getErrorMessageForUser(err, '');
+      setErrorMessage(message || null);
     } finally {
       setSaving(false);
     }
@@ -74,6 +77,7 @@ export function useCategories() {
       return;
     }
     try {
+      setErrorMessage(null);
       const { error } = await supabase
         .from('categories')
         .delete()
@@ -81,7 +85,8 @@ export function useCategories() {
       if (error) throw error;
       fetchCategories();
     } catch (err: unknown) {
-      alert(getErrorMessageForUser(err, 'Category could not be deleted. Please try again.'));
+      const message = getErrorMessageForUser(err, '');
+      setErrorMessage(message || null);
     }
   };
 
@@ -104,5 +109,7 @@ export function useCategories() {
     handleSave,
     handleDelete,
     closeModal,
+    errorMessage,
+    dismissError: () => setErrorMessage(null),
   };
 }

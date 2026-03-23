@@ -47,7 +47,14 @@ export interface Order {
   id: string;
   user_id: string;
   total: number;
-  status: 'pending' | 'completed' | 'cancelled';
+  status:
+    | 'pending'
+    | 'new'
+    | 'preparing'
+    | 'ready'
+    | 'completed'
+    | 'cancelled'
+    | 'payment_failed';
   address?: string;
   created_at: string;
   order_items?: OrderItem[];

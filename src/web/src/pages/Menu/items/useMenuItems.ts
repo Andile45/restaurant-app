@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../../api/supabaseClient';
 import { getErrorMessageForUser } from '../../../utils/errorUtils';
 import type { FoodItem } from '../../../types';
@@ -32,8 +32,9 @@ export function useMenuItems() {
   const [editingItem, setEditingItem] = useState<FoodItem | null>(null);
   const [formData, setFormData] = useState<ItemFormData>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('categories')
@@ -44,9 +45,9 @@ export function useMenuItems() {
     } catch {
       setCategories([]);
     }
-  };
+  }, []);
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     try {
       setLoading(true);
       let query = supabase
@@ -64,7 +65,7 @@ export function useMenuItems() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory]);
 
   useEffect(() => {
     fetchCategories();
@@ -73,6 +74,33 @@ export function useMenuItems() {
   useEffect(() => {
     fetchItems();
   }, [selectedCategory]);
+
+  // Supabase realtime: new/updated/deleted menu items + category changes.
+  // This updates the CMS menu instantly without manual refresh.
+  useEffect(() => {
+    const channel = supabase
+      .channel('cms-menu-items-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'food_items' },
+        () => {
+          fetchItems();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'categories' },
+        () => {
+          fetchCategories();
+          fetchItems();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchItems, fetchCategories]);
 
   const filteredItems = items.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -99,6 +127,7 @@ export function useMenuItems() {
 
   const handleToggleAvailability = async (item: FoodItem) => {
     try {
+      setErrorMessage(null);
       const { error } = await supabase
         .from('food_items')
         .update({ is_available: !item.is_available })
@@ -106,22 +135,24 @@ export function useMenuItems() {
       if (error) throw error;
       fetchItems();
     } catch (err: unknown) {
-      alert(getErrorMessageForUser(err, 'Availability could not be updated. Please try again.'));
+      const message = getErrorMessageForUser(err, '');
+      setErrorMessage(message || null);
     }
   };
 
   const handleSave = async () => {
     if (!formData.name.trim() || !formData.category_id || !formData.price) {
-      alert('Please fill in name, category, and price.');
+      setErrorMessage('Please fill in name, category, and price.');
       return;
     }
     const price = parseFloat(formData.price);
     if (isNaN(price) || price <= 0) {
-      alert('Please enter a valid price (a positive number).');
+      setErrorMessage('Please enter a valid price (a positive number).');
       return;
     }
     setSaving(true);
     try {
+      setErrorMessage(null);
       if (editingItem) {
         const { error } = await supabase
           .from('food_items')
@@ -152,7 +183,8 @@ export function useMenuItems() {
       setEditingItem(null);
       fetchItems();
     } catch (err: unknown) {
-      alert(getErrorMessageForUser(err, 'Item could not be saved. Please try again.'));
+      const message = getErrorMessageForUser(err, '');
+      setErrorMessage(message || null);
     } finally {
       setSaving(false);
     }
@@ -182,5 +214,7 @@ export function useMenuItems() {
     handleSave,
     closeModal,
     fetchItems,
+    errorMessage,
+    dismissError: () => setErrorMessage(null),
   };
 }

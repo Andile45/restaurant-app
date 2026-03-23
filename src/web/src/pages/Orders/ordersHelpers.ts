@@ -1,14 +1,23 @@
 import { Order } from '../../types';
 
 export type ExtendedOrder = Omit<Order, 'status'> & {
-  status: 'pending' | 'new' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+  status: 'pending' | 'new' | 'preparing' | 'ready' | 'completed' | 'cancelled' | 'payment_failed';
 };
 
-export type OrderStatus = 'all' | 'pending' | 'new' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+export type OrderStatus =
+  | 'all'
+  | 'pending'
+  | 'new'
+  | 'preparing'
+  | 'ready'
+  | 'completed'
+  | 'cancelled'
+  | 'payment_failed';
 
 export function getStatusColor(status: string): string {
   switch (status.toLowerCase()) {
     case 'completed': return 'bg-green-50 text-status-success';
+    case 'payment_failed': return 'bg-fuchsia-50 text-fuchsia-700';
     case 'preparing': return 'bg-yellow-50 text-status-warning';
     case 'ready': return 'bg-blue-50 text-status-info';
     case 'pending':

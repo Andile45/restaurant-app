@@ -16,6 +16,8 @@ export const Categories: React.FC = () => {
     handleSave,
     handleDelete,
     closeModal,
+    errorMessage,
+    dismissError,
   } = useCategories();
 
   if (loading) {
@@ -29,6 +31,19 @@ export const Categories: React.FC = () => {
 
   return (
     <div>
+      {errorMessage && (
+        <div className="mb-4 p-3 rounded-md bg-red-50 border border-red-200 text-red-800 body text-sm">
+          {errorMessage}
+          <button
+            type="button"
+            onClick={dismissError}
+            className="ml-3 underline text-red-700"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <CategoriesTable
         categories={categories}
         onAdd={handleAdd}

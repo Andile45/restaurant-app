@@ -21,6 +21,8 @@ export const Items: React.FC = () => {
     handleToggleAvailability,
     handleSave,
     closeModal,
+    errorMessage,
+    dismissError,
   } = useMenuItems();
 
   if (loading && items.length === 0) {
@@ -34,6 +36,19 @@ export const Items: React.FC = () => {
 
   return (
     <div>
+      {errorMessage && (
+        <div className="mb-4 p-3 rounded-md bg-red-50 border border-red-200 text-red-800 body text-sm">
+          {errorMessage}
+          <button
+            type="button"
+            onClick={dismissError}
+            className="ml-3 underline text-red-700"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <ItemsTable
         items={items}
         categories={categories}

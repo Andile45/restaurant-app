@@ -11,7 +11,9 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   session: null,
-  loading: false,
+  // Start in "loading" to prevent `ProtectedRoute` from redirecting
+  // before `supabase.auth.getSession()` has run on the first render.
+  loading: true,
   error: null,
 };
 
